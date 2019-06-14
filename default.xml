@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+
+  <remote name="poky"
+            fetch="git://git.yoctoproject.org/"
+            revision="thud" />
+
+  <remote name="open-embedded"
+            fetch="git://git.openembedded.org/"
+            revision="thud" />
+    
+	<remote name="meta-virtualization"
+            fetch="git://git.yoctoproject.org/meta-virtualization"
+            revision="thud" />
+    
+  <default  sync-j="8" />
+</manifest>
