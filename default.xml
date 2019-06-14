@@ -10,8 +10,15 @@
             revision="thud" />
     
 	<remote name="meta-virtualization"
-            fetch="git://git.yoctoproject.org/meta-virtualization"
+            fetch="git://git.yoctoproject.org/"
             revision="thud" />
     
+    <project path="poky" name="poky" remote="poky" />
+
+    <project path="meta-openembedded" name="meta-openembedded" remote="open-embedded" />
+
+    <project path="" name="meta-virtualization" remote="meta-virtualization" />
+    
   <default  sync-j="8" />
+
 </manifest>

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -o errexit  # stop on first error
-#set -o xtrace  # log every step
+set -o xtrace  # log every step
 set -o nounset  # exit when script tries to use undeclared variables
 
 echo "Syntax check started for $0. On any syntax error script will exit"
