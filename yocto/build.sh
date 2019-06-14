@@ -46,7 +46,7 @@ do_clean ()
 {
     echo "do_clean start"
 
-
+    rm -rf ${BUILD_DIR}
 
     echo "do_clean done"
 }
@@ -55,6 +55,14 @@ do_prep_host ()
 {
     echo "do_prep_host start"
 
+    set +o nounset
+
+    source ${POKY_DIR}/oe-init-build-env build_${TARGET_ARCH}
+    
+    cp ${YOCTO_DIR}/conf/bblayers.conf.example ${BUILD_DIR}/conf/bblayers.conf
+
+    cp ${YOCTO_DIR}/conf/local.conf.example ${BUILD_DIR}/conf/local.conf
+
     echo "do_prep_host done"
 }
 
@@ -62,9 +70,18 @@ do_build ()
 {
     echo "do_build start"
 
-
+    bitbake ${IMAGE_NAME}
 
     echo "do_build done"
+}
+
+do_custom_build ()
+{
+    echo "do_custom_build start"
+
+    bitbake -c devshell ${1}
+
+    echo "do_custom_build done"
 }
 
 ###############################################################################
@@ -132,6 +149,12 @@ while true ; do
         build)
             do_prep_host
             do_build
+            shift
+            break
+            ;;
+        custom-build)
+            do_prep_host
+            do_custom_build ${2}
             shift
             break
             ;;
