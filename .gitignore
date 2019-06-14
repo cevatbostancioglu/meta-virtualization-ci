@@ -6,3 +6,5 @@ yocto/meta-openembedded/
 yocto/meta-virtualization/
 
 yocto/poky/
+
+build_*/
