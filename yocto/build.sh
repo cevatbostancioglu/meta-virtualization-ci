@@ -75,6 +75,15 @@ do_build ()
     echo "do_build done"
 }
 
+do_custom_build ()
+{
+    echo "do_custom_build start"
+
+    bitbake -c devshell ${1}
+
+    echo "do_custom_build done"
+}
+
 ###############################################################################
 # MAIN
 ###############################################################################
@@ -140,6 +149,12 @@ while true ; do
         build)
             do_prep_host
             do_build
+            shift
+            break
+            ;;
+        custom-build)
+            do_prep_host
+            do_custom_build ${2}
             shift
             break
             ;;
