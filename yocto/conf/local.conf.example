@@ -249,4 +249,73 @@ PACKAGECONFIG_append_pn-nativesdk-qemu = " sdl"
 CONF_VERSION = "1"
 
 DISTRO_FEATURES_append = " virtualization "
-IMAGE_INSTALL_append = " kvmtool "
+
+##cloud-image-compute
+IMAGE_FEATURES += "ssh-server-openssh"
+EXTRA_IMAGE_FEATURES = "tools-debug debug-tweaks"
+
+IMAGE_INSTALL = "\
+    ${CORE_IMAGE_BASE_INSTALL} \
+    packagegroup-core-basic \
+    openvswitch \
+    libvirt \
+    openflow \
+    "
+
+##cloud-image-controller
+IMAGE_FEATURES += "ssh-server-openssh package-management"
+EXTRA_IMAGE_FEATURES = "tools-debug debug-tweaks"
+
+IMAGE_INSTALL = "\
+    ${CORE_IMAGE_BASE_INSTALL} \
+    packagegroup-core-basic \
+    openvswitch \
+    openvswitch-controller \
+    openvswitch-switch \
+    openvswitch-brcompat \
+    criu \
+    libvirt \
+    libvirt-libvirtd \
+    libvirt-python \
+    libvirt-virsh \    
+    openflow \
+    qemu \   
+    kernel-modules \
+    dhcp-client \
+    perl-modules \
+    grub \
+    mysql5 \
+    python-twisted \ 
+    python-lxml \
+    "
+
+##cloud-image-guest
+IMAGE_FEATURES += "ssh-server-openssh package-management"
+EXTRA_IMAGE_FEATURES = "tools-debug debug-tweaks"
+
+IMAGE_INSTALL = "\
+    ${CORE_IMAGE_BASE_INSTALL} \
+    packagegroup-core-basic \
+    openflow \
+    qemu \   
+    kernel-modules \
+    tcpdump \
+    dhcp-client \
+    "
+
+##kvm-image-minimal
+IMAGE_INSTALL = " \
+    packagegroup-core-boot \
+    qemu \
+    libvirt \
+    libvirt-libvirtd \
+    libvirt-virsh \
+    kernel-module-kvm \
+    kernel-module-kvm-intel \
+    kernel-module-kvm-amd \
+    "
+
+IMAGE_FEATURES += "ssh-server-openssh"
+
+IMAGE_LINGUAS = " "
+
