@@ -63,6 +63,13 @@ do_prep_host ()
 
     cp ${YOCTO_DIR}/conf/local.conf.example ${BUILD_DIR}/conf/local.conf
 
+    cp ${YOCTO_DIR}/conf/local_conf_* ${BUILD_DIR}/conf/
+
+    sed_command="${1}"
+    sed -i "s/<git_branch>/$sed_command/g" "${BUILD_DIR}/conf/local.conf"
+
+    mkdir -p ${DOWNLOAD_PATH} || true
+
     echo "do_prep_host done"
 }
 
@@ -147,14 +154,14 @@ while true ; do
             break
             ;;
         build)
-            do_prep_host
+            do_prep_host $2
             do_build
             shift
             break
             ;;
         custom-build)
-            do_prep_host
-            do_custom_build ${2}
+            do_prep_host $2
+            do_custom_build ${3}
             shift
             break
             ;;

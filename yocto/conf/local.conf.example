@@ -248,5 +248,9 @@ PACKAGECONFIG_append_pn-nativesdk-qemu = " sdl"
 # this doesn't mean anything to you.
 CONF_VERSION = "1"
 
+DL_DIR = "/opt/yocto_download"
+
 DISTRO_FEATURES_append = " virtualization "
-IMAGE_INSTALL_append = " kvmtool "
+
+include local_conf_arm_all.inc
+include local_conf_<git_branch>.inc
