@@ -91,6 +91,11 @@ do_custom_build ()
     echo "do_custom_build done"
 }
 
+do_runqemu ()
+{
+    runqemu qemuarm
+}
+
 ###############################################################################
 # MAIN
 ###############################################################################
@@ -145,6 +150,17 @@ while true ; do
     case "$1" in
         fetch)
             do_fetch
+            shift
+            break
+            ;;
+        wget)
+            do_wget_meta "sumo" "meta-virtualization"
+            shift
+            break
+            ;;
+        runqemu)
+            do_prep_host
+            do_runqemu
             shift
             break
             ;;
