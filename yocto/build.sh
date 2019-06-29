@@ -22,7 +22,7 @@ is_program_installed() {
 
 do_env_check(){
     ENV_OK=1
-    is_program_installed repo
+    is_program_installed sed
     if [ $ENV_OK -eq 1 ]; then
         echo -e "\e[1;32m\nNo problems found on build environment.\n\e[0m"
     else
@@ -36,8 +36,14 @@ do_fetch ()
     echo "do_fetch start"
 
     do_env_check
-    echo | repo init -b ${GIT_CURRENT_BRANCH} -u ${GIT_BRANCH_URL}
-    repo sync
+    
+    cd ${YOCTO_DIR}
+
+    git clone -b ${1} git://git.yoctoproject.org/poky
+
+    git clone -b ${1} git://git.openembedded.org/meta-openembedded
+
+    git clone -b ${1} git://git.yoctoproject.org/meta-virtualization
 
     echo "do_fetch done"
 }
@@ -149,7 +155,7 @@ shift $SHIFTCOUNT
 while true ; do
     case "$1" in
         fetch)
-            do_fetch
+            do_fetch $2
             shift
             break
             ;;
