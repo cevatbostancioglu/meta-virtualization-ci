@@ -67,9 +67,9 @@ do_prep_host ()
     
     cp ${YOCTO_DIR}/conf/bblayers.conf.example ${BUILD_DIR}/conf/bblayers.conf
 
-    cp ${YOCTO_DIR}/conf/local.conf.example ${BUILD_DIR}/conf/local.conf
+    cp ${YOCTO_DIR}/conf/${TARGET_ARCH}/local.conf.example ${BUILD_DIR}/conf/local.conf
 
-    cp ${YOCTO_DIR}/conf/local_conf_* ${BUILD_DIR}/conf/
+    cp ${YOCTO_DIR}/conf/${TARGET_ARCH}/local_conf_* ${BUILD_DIR}/conf/
 
     sed_command="${1}"
     sed -i "s/<git_branch>/$sed_command/g" "${BUILD_DIR}/conf/local.conf"
@@ -92,7 +92,7 @@ do_custom_build ()
 {
     echo "do_custom_build start"
 
-    bitbake -c devshell ${1}
+    bitbake -c clean ${1}
 
     echo "do_custom_build done"
 }
