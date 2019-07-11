@@ -92,7 +92,7 @@ do_custom_build ()
 {
     echo "do_custom_build start"
 
-    bitbake -c clean ${1}
+    bitbake ${1}
 
     echo "do_custom_build done"
 }
