@@ -22,8 +22,8 @@ linter:
   stage: linter
   script:
     - source scripts/linter.sh commit-msg
-    - source scripts/linter.sh branch-name
-
+    #source scripts/linter.sh branch-name
+    - source scripts/linter.sh json
 fetch:
   stage: fetch
   script:

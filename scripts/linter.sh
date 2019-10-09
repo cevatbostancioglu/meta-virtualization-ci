@@ -22,6 +22,11 @@ while true ; do
             shift
             break
             ;;
+        json)
+            source scripts/hooks/jsonlint.sh scripts/hooks/test.json
+            shift
+            break
+            ;;
         *)
             if [[ -n $1 ]]; then
                 echo "!!!!!!!!!!!Unknown build command " $1 "!!!!!!!!!!"
