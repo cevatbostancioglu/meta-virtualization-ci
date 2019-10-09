@@ -1,0 +1,74 @@
+stages:
+  - linter
+  - fetch
+  - build
+  - test
+  - provision
+  - configure
+  - deploy
+  - monitor
+  - feedback
+
+cache: &global_cache
+  key: fetch-build
+  paths:
+    - yocto/build_arm/
+    - yocto/build_amd64/
+    - yocto/meta-openembedded/
+    - yocto/poky/
+    - yocto/meta-virtualization/
+
+linter:
+  stage: linter
+  script:
+    - echo "linter."
+
+fetch:
+  stage: fetch
+  script:
+    - cd yocto
+    - cd ..
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache
+
+build:
+  stage: build
+  script:
+    - echo "building with $USER"
+    - cd yocto
+    - ls -all
+    - cd ..
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache
+
+test:
+  stage: test
+  script:
+    - echo "testing"
+
+provision:
+  stage: provision
+  script:
+    - echo "provision"
+
+configure:
+  stage: configure
+  script:
+    - echo "testing"
+
+deploy:
+  stage: deploy
+  script:
+    - echo "deploy"
+
+monitor:
+  stage: monitor
+  script:
+    - echo "monitor"
+
+feedback:
+  stage: feedback
+  script:
+    - echo "feedback"
