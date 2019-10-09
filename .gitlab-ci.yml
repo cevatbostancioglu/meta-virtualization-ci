@@ -21,7 +21,8 @@ cache: &global_cache
 linter:
   stage: linter
   script:
-    - echo "linter."
+    - source scripts/linter.sh commit-msg
+    - source scripts/linter.sh branch-name
 
 fetch:
   stage: fetch
