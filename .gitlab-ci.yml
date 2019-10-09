@@ -1,13 +1,6 @@
 stages:
   - linter
   - fetch
-  - build
-  - test
-  - provision
-  - configure
-  - deploy
-  - monitor
-  - feedback
 
 cache: &global_cache
   key: fetch-build
@@ -24,52 +17,13 @@ linter:
     - source scripts/linter.sh commit-msg
     #source scripts/linter.sh branch-name
     - source scripts/linter.sh json
+
 fetch:
   stage: fetch
   script:
     - cd yocto
+    - bash build.sh fetch master
     - cd ..
   cache:
     # inherit all global cache settings
     <<: *global_cache
-
-build:
-  stage: build
-  script:
-    - echo "building with $USER"
-    - cd yocto
-    - ls -all
-    - cd ..
-  cache:
-    # inherit all global cache settings
-    <<: *global_cache
-
-test:
-  stage: test
-  script:
-    - echo "testing"
-
-provision:
-  stage: provision
-  script:
-    - echo "provision"
-
-configure:
-  stage: configure
-  script:
-    - echo "testing"
-
-deploy:
-  stage: deploy
-  script:
-    - echo "deploy"
-
-monitor:
-  stage: monitor
-  script:
-    - echo "monitor"
-
-feedback:
-  stage: feedback
-  script:
-    - echo "feedback"
