@@ -1,6 +1,7 @@
 stages:
   - linter
   - fetch
+  - build
 
 cache: &global_cache
   key: fetch-build
@@ -22,8 +23,18 @@ fetch:
   stage: fetch
   script:
     - cd yocto
-    - bash build.sh fetch master
+    - bash build.sh fetch thud
     - cd ..
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache
+
+build:
+  stage: build
+  script:
+    - cd yocto
+    - bash build.sh -a arm build master
+    - cd .
   cache:
     # inherit all global cache settings
     <<: *global_cache

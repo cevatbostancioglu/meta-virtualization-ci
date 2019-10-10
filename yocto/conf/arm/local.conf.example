@@ -64,8 +64,6 @@ MACHINE ??= "qemux86"
 #
 # The default is a sstate-cache directory under TOPDIR.
 #
-#SSTATE_DIR ?= "${TOPDIR}/sstate-cache"
-
 #
 # Where to place the build output
 #
@@ -248,9 +246,14 @@ PACKAGECONFIG_append_pn-nativesdk-qemu = " sdl"
 # this doesn't mean anything to you.
 CONF_VERSION = "1"
 
-DL_DIR = "/opt/yocto_download"
+DL_DIR = "/build/yocto_download"
+SSTATE_DIR ?= "${DL_DIR}/sstate-cache"
+TMPDIR = "${DL_DIR}/tmp"
 
 DISTRO_FEATURES_append = " virtualization "
 
 #include local_conf_arm_all.inc
 include local_conf_<git_branch>.inc
+
+BB_NUMBER_THREADS = "8"
+PARALLEL_MAKE = "-j 4"

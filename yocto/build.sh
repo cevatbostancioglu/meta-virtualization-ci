@@ -8,6 +8,8 @@ echo "Syntax check started for $0. On any syntax error script will exit"
 bash -n $0 # check and exit for syntax errors in script.
 echo "Syntax is OK."
 
+echo "running with ${USER}"
+
 usage ()
 {
     echo "usage"    
@@ -37,13 +39,21 @@ do_fetch ()
 
     do_env_check
     
-    cd ${YOCTO_DIR}
+    pushd ${DOWNLOAD_PATH}
 
-    git clone -b ${1} git://git.yoctoproject.org/poky
+    if [ ! -d poky ]; then
+        git clone -b ${1} git://git.yoctoproject.org/poky
+    fi
 
-    git clone -b ${1} git://git.openembedded.org/meta-openembedded
+    if [ ! -d meta-openembedded ]; then
+        git clone -b ${1} git://git.openembedded.org/meta-openembedded
+    fi
 
-    git clone -b ${1} git://git.yoctoproject.org/meta-virtualization
+    if [ ! -d meta-virtualization ]; then
+        git clone -b master git://git.yoctoproject.org/meta-virtualization
+    fi
+
+    popd
 
     echo "do_fetch done"
 }
@@ -63,7 +73,14 @@ do_prep_host ()
 
     set +o nounset
 
-    source ${POKY_DIR}/oe-init-build-env build_${TARGET_ARCH}
+
+    mkdir -p ${DOWNLOAD_PATH} || true
+    mkdir -p ${SSTATE_DIR} || true
+    mkdir -p ${TMPDIR} || true
+
+    pushd ${DOWNLOAD_PATH}
+
+    source ${POKY_DIR}/oe-init-build-env ${BUILD_DIR}
     
     cp ${YOCTO_DIR}/conf/bblayers.conf.example ${BUILD_DIR}/conf/bblayers.conf
 
@@ -74,7 +91,7 @@ do_prep_host ()
     sed_command="${1}"
     sed -i "s/<git_branch>/$sed_command/g" "${BUILD_DIR}/conf/local.conf"
 
-    mkdir -p ${DOWNLOAD_PATH} || true
+    popd
 
     echo "do_prep_host done"
 }
@@ -112,15 +129,18 @@ if [ $# -eq 0 ]; then
     exit 0
 fi
 
-source ${PWD}/.config
-
 SHIFTCOUNT=0
+TARGET_ARCH="arm"
 
-while getopts ":h?:o:f:m:p:c:i:" opt; do
+while getopts ":h?:o:f:m:p:c:i:a:" opt; do
     case "${opt:-}" in
         h|\?)
             usage
             exit 0
+            ;;
+        a)
+            export TARGET_ARCH=$OPTARG
+            SHIFTCOUNT=$(( $SHIFTCOUNT+2 ))
             ;;
         o)
             export BUILD_TYPE=$OPTARG
@@ -148,6 +168,8 @@ while getopts ":h?:o:f:m:p:c:i:" opt; do
             ;;
     esac
 done
+
+source ${PWD}/.config
 
 shift $SHIFTCOUNT
 
