@@ -13,6 +13,7 @@ echo "running with ${USER}"
 usage ()
 {
     echo "usage"    
+    exit 1
 }
 
 is_program_installed() {
@@ -33,9 +34,9 @@ do_env_check(){
     fi
 }
 
-do_fetch ()
+do_meta_fetch ()
 {
-    echo "do_fetch start"
+    echo "do_meta_fetch start"
 
     do_env_check
     
@@ -55,7 +56,16 @@ do_fetch ()
 
     popd
 
-    echo "do_fetch done"
+    echo "do_meta_fetch done"
+}
+
+do_bitbake_fetch ()
+{
+    echo "do_bitbake_fetch start"
+
+    bitbake -c fetch ${IMAGE_NAME} 
+
+    echo "do_bitbake_fetch done"
 }
 
 do_clean ()
@@ -84,7 +94,7 @@ do_prep_host ()
     
     cp ${YOCTO_DIR}/conf/bblayers.conf.example ${BUILD_DIR}/conf/bblayers.conf
 
-    cp ${YOCTO_DIR}/conf/${TARGET_ARCH}/local.conf.example ${BUILD_DIR}/conf/local.conf
+    cp ${YOCTO_DIR}/conf/local.conf.example ${BUILD_DIR}/conf/local.conf
 
     cp ${YOCTO_DIR}/conf/${TARGET_ARCH}/local_conf_* ${BUILD_DIR}/conf/
 
@@ -132,7 +142,7 @@ fi
 
 SHIFTCOUNT=0
 TARGET_ARCH="arm"
-MACHINE_NAME="qemux86"
+MACHINE_NAME="qemuarm"
 
 while getopts ":h?:o:f:m:p:c:i:a:" opt; do
     case "${opt:-}" in
@@ -178,8 +188,14 @@ shift $SHIFTCOUNT
 # Process all commands.
 while true ; do
     case "$1" in
-        fetch)
-            do_fetch $2
+        meta-fetch)
+            do_meta_fetch $2
+            shift
+            break
+            ;;
+        bitbake-fetch)
+            do_prep_host ${2}
+            do_bitbake_fetch
             shift
             break
             ;;

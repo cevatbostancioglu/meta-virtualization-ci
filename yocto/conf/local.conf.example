@@ -18,12 +18,12 @@
 # of emulated machines available which can boot and run in the QEMU emulator:
 #
 #MACHINE ?= "qemuarm"
-#MACHINE ?= "qemuarm64"
+MACHINE ?= "qemuarm64"
 #MACHINE ?= "qemumips"
 #MACHINE ?= "qemumips64"
 #MACHINE ?= "qemuppc"
 #MACHINE ?= "qemux86"
-MACHINE ?= "qemux86-64"
+#MACHINE ?= "qemux86-64"
 #
 # There are also the following hardware board target machines included for 
 # demonstration purposes:
@@ -35,7 +35,7 @@ MACHINE ?= "qemux86-64"
 #MACHINE ?= "edgerouter"
 #
 # This sets the default machine to be qemux86 if no other machine is selected:
-MACHINE ??= "qemux86"
+#MACHINE ??= "qemux86"
 
 #
 # Where to place downloads
@@ -64,8 +64,6 @@ MACHINE ??= "qemux86"
 #
 # The default is a sstate-cache directory under TOPDIR.
 #
-#SSTATE_DIR ?= "${TOPDIR}/sstate-cache"
-
 #
 # Where to place the build output
 #
@@ -247,10 +245,15 @@ PACKAGECONFIG_append_pn-nativesdk-qemu = " sdl"
 # track the version of this file when it was generated. This can safely be ignored if
 # this doesn't mean anything to you.
 CONF_VERSION = "1"
+MACHINE="<MACHINE_NAME>"
 
-DL_DIR = "/opt/yocto_download"
+DL_DIR = "/build/yocto_<MACHINE_NAME>"
+SSTATE_DIR ?= "${DL_DIR}/sstate-cache"
+TMPDIR = "${DL_DIR}/tmp"
 
 DISTRO_FEATURES_append = " virtualization "
 
-#include local_conf_amd64_all.inc
 include local_conf_<git_branch>.inc
+
+BB_NUMBER_THREADS = "8"
+PARALLEL_MAKE = "-j 4"
