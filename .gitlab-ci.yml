@@ -29,12 +29,23 @@ fetch:
     # inherit all global cache settings
     <<: *global_cache
 
-build:
+build-qemuarm:
   stage: build
   script:
     - cd yocto
-    - bash build.sh -a arm build master
+    - bash build.sh -a arm -m qemuarm build master
     - cd .
   cache:
     # inherit all global cache settings
     <<: *global_cache
+
+build-qemux86:
+  stage: build
+  script:
+    - cd yocto
+    - bash build.sh -a amd64 -m qemux86 build master
+    - cd .
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache
+

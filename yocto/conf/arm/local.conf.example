@@ -35,7 +35,7 @@ MACHINE ?= "qemuarm64"
 #MACHINE ?= "edgerouter"
 #
 # This sets the default machine to be qemux86 if no other machine is selected:
-MACHINE ??= "qemux86"
+#MACHINE ??= "qemux86"
 
 #
 # Where to place downloads
@@ -245,6 +245,7 @@ PACKAGECONFIG_append_pn-nativesdk-qemu = " sdl"
 # track the version of this file when it was generated. This can safely be ignored if
 # this doesn't mean anything to you.
 CONF_VERSION = "1"
+MACHINE="<MACHINE_NAME>"
 
 DL_DIR = "/build/yocto_download"
 SSTATE_DIR ?= "${DL_DIR}/sstate-cache"

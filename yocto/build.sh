@@ -90,6 +90,7 @@ do_prep_host ()
 
     sed_command="${1}"
     sed -i "s/<git_branch>/$sed_command/g" "${BUILD_DIR}/conf/local.conf"
+    sed -i "s/<MACHINE_NAME>/${MACHINE_NAME}/g" "${BUILD_DIR}/conf/local.conf"
 
     popd
 
@@ -116,7 +117,7 @@ do_custom_build ()
 
 do_runqemu ()
 {
-    runqemu qemuarm
+    runqemu ${MACHINE_NAME}
 }
 
 ###############################################################################
@@ -131,6 +132,7 @@ fi
 
 SHIFTCOUNT=0
 TARGET_ARCH="arm"
+MACHINE_NAME="qemux86"
 
 while getopts ":h?:o:f:m:p:c:i:a:" opt; do
     case "${opt:-}" in
@@ -187,7 +189,7 @@ while true ; do
             break
             ;;
         runqemu)
-            do_prep_host
+            do_prep_host $2
             do_runqemu
             shift
             break
