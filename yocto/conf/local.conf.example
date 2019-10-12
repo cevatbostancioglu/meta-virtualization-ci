@@ -253,6 +253,8 @@ TMPDIR = "${DL_DIR}/tmp"
 
 DISTRO_FEATURES_append = " virtualization "
 
+IMAGE_INSTALL_append = " openssh "
+
 include local_conf_<git_branch>.inc
 
 BB_NUMBER_THREADS = "8"

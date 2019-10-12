@@ -25,7 +25,11 @@ is_program_installed() {
 
 do_env_check(){
     ENV_OK=1
+    
     is_program_installed sed
+    is_program_installed bats
+    is_program_installed jsonlint-php
+
     if [ $ENV_OK -eq 1 ]; then
         echo -e "\e[1;32m\nNo problems found on build environment.\n\e[0m"
     else
@@ -127,7 +131,10 @@ do_custom_build ()
 
 do_runqemu ()
 {
-    runqemu ${MACHINE_NAME}
+    echo "do_runqemu start"
+    rm -rf ${QEMU_NAMED_OUT} || true
+    runqemu ${MACHINE_NAME} nographic > ${QEMU_NAMED_OUT} &
+    echo "do_runqemu done"
 }
 
 ###############################################################################
@@ -194,7 +201,7 @@ while true ; do
             break
             ;;
         bitbake-fetch)
-            do_prep_host ${2}
+            do_prep_host ${2:-master}
             do_bitbake_fetch
             shift
             break
@@ -205,7 +212,7 @@ while true ; do
             break
             ;;
         runqemu)
-            do_prep_host $2
+            do_prep_host ${2:-master}
             do_runqemu
             shift
             break
@@ -216,7 +223,7 @@ while true ; do
             break
             ;;
         build)
-            do_prep_host $2
+            do_prep_host ${2:-master}
             do_build
             shift
             break

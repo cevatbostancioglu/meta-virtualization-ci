@@ -2,6 +2,7 @@ stages:
   - linter
   - fetch
   - build
+  - run
 
 cache: &global_cache
   key: fetch-build
@@ -48,3 +49,19 @@ build-qemux86:
     - cd yocto
     - bash build.sh -a amd64 -m qemux86 build master
     - cd .
+
+run-qemuarm:
+  stage: run
+  script:
+  - cd yocto
+  - bash build.sh -a arm -m qemuarm runqemu
+  - bash test.sh -a arm -m qemuarm runqemu
+  - cd .
+
+run-qemux86:
+  stage: run
+  script:
+  - cd yocto
+  - bash build.sh -a amd64 -m qemux86 runqemu
+  - bash test.sh -a amd64 -m qemux86 runqemu
+  - cd .
