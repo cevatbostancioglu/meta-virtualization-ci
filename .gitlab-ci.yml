@@ -25,17 +25,25 @@ fetch-qemuarm:
   extends: .arm-config
   stage: fetch
   script:
-    - bash yocto/build.sh meta-fetch ${CI_COMMIT_REF_NAME}
+    - bash yocto/build.sh meta-fetch thud
     - bash yocto/build.sh bitbake-fetch master
   interruptible: false
+  only:
+    changes:
+      - yocto/*.*
+      - .gitlab-ci.yml
 
 fetch-qemux86:
   extends: .amd64-config
   stage: fetch
   script:
-    - bash yocto/build.sh meta-fetch ${CI_COMMIT_REF_NAME}
+    - bash yocto/build.sh meta-fetch thud
     - bash yocto/build.sh bitbake-fetch master 
   interruptible: false
+  only:
+    changes:
+      - yocto/*.*
+      - .gitlab-ci.yml
 
 build-qemuarm:
   extends: .arm-config
@@ -51,6 +59,10 @@ build-qemuarm:
       - deploy.tar.gz
     when: on_success
     expire_in: 15 mins
+  only:
+    changes:
+      - yocto/*.*
+      - .gitlab-ci.yml
 
 build-qemux86:
   extends: .amd64-config
@@ -66,6 +78,10 @@ build-qemux86:
       - deploy.tar.gz
     when: on_success
     expire_in: 15 mins
+  only:
+    changes:
+      - yocto/*.*
+      - .gitlab-ci.yml
 
 run-qemuarm:
   extends: .arm-config
@@ -77,6 +93,11 @@ run-qemuarm:
   dependencies:
     - build-qemuarm
   timeout: 5m
+  only:
+    changes:
+      - yocto/*.*
+      - .gitlab-ci.yml
+      - scripts/tests/*.*
 
 run-qemux86:
   extends: .amd64-config
@@ -88,3 +109,8 @@ run-qemux86:
   dependencies:
     - build-qemux86
   timeout: 5m
+  only:
+    changes:
+      - yocto/*.*
+      - .gitlab-ci.yml
+      - scripts/tests/*.*

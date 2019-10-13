@@ -87,10 +87,6 @@ do_prep_host ()
 
     set +o nounset
 
-    mkdir -p ${DOWNLOAD_PATH} || true
-    mkdir -p ${SSTATE_DIR} || true
-    mkdir -p ${TMPDIR} || true
-
     pushd ${DOWNLOAD_PATH}
 
     source ${POKY_DIR}/oe-init-build-env ${BUILD_DIR}
@@ -204,6 +200,10 @@ while getopts ":h?:o:f:m:p:c:i:a:" opt; do
 done
 
 source ${PWD}/.config
+
+mkdir -p ${DOWNLOAD_PATH} || true
+mkdir -p ${SSTATE_DIR} || true
+mkdir -p ${TMPDIR} || true
 
 shift $SHIFTCOUNT
 
