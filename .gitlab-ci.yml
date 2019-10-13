@@ -2,66 +2,64 @@ stages:
   - linter
   - fetch
   - build
-  - run
-
-cache: &global_cache
-  key: fetch-build
-  paths:
-    - yocto/build_arm/
-    - yocto/build_amd64/
-    - yocto/meta-openembedded/
-    - yocto/poky/
-    - yocto/meta-virtualization/
+  - run-test
 
 linter:
   stage: linter
   script:
     - source scripts/linter.sh commit-msg
-    #source scripts/linter.sh branch-name
     - source scripts/linter.sh json
 
 fetch-qemuarm:
   stage: fetch
   script:
-    - cd yocto
-    - bash build.sh -a arm -m qemuarm meta-fetch thud
-    - bash build.sh -a arm -m qemuarm bitbake-fetch master
-    - cd ..
+    - bash yocto/build.sh -a arm -m qemuarm meta-fetch ${CI_COMMIT_REF_NAME}
+    - bash yocto/build.sh -a arm -m qemuarm bitbake-fetch master
 
 fetch-qemux86:
   stage: fetch
   script:
-    - cd yocto
-    - bash build.sh -a amd64 -m qemux86 meta-fetch thud
-    - bash build.sh -a amd64 -m qemux86 bitbake-fetch master 
-    - cd ..
+    - bash yocto/build.sh -a amd64 -m qemux86 meta-fetch ${CI_COMMIT_REF_NAME}
+    - bash yocto/build.sh -a amd64 -m qemux86 bitbake-fetch master 
 
 build-qemuarm:
   stage: build
   script:
-    - cd yocto
-    - bash build.sh -a arm -m qemuarm build master
-    - cd .
+    - bash yocto/build.sh -a arm -m qemuarm build master
+    - bash yocto/build.sh -a arm -m qemuarm take-release
+  dependencies:
+    - fetch-qemuarm
+  artifacts:
+    paths:
+      - deploy.tar.gz
+    when: on_success
+    expire_in: 15 mins
 
 build-qemux86:
   stage: build
   script:
-    - cd yocto
-    - bash build.sh -a amd64 -m qemux86 build master
-    - cd .
+    - bash yocto/build.sh -a amd64 -m qemux86 build master
+    - bash yocto/build.sh -a arm -m qemuarm take-release
+  dependencies:
+    - fetch-qemux86
+  artifacts:
+    paths:
+      - deploy.tar.gz
+    when: on_success
+    expire_in: 15 mins
 
 run-qemuarm:
-  stage: run
+  stage: run-test
   script:
-  - cd yocto
-  - bash build.sh -a arm -m qemuarm runqemu
-  - bash test.sh -a arm -m qemuarm runqemu
-  - cd .
+  - bash yocto/build.sh -a arm -m qemuarm runqemu
+  - bash yocto/test.sh -a arm -m qemuarm runqemu
+  dependencies:
+    - build-qemuarm
 
 run-qemux86:
-  stage: run
+  stage: run-test
   script:
-  - cd yocto
-  - bash build.sh -a amd64 -m qemux86 runqemu
-  - bash test.sh -a amd64 -m qemux86 runqemu
-  - cd .
+  - bash yocto/build.sh -a amd64 -m qemux86 runqemu
+  - bash yocto/test.sh -a amd64 -m qemux86 runqemu
+  dependencies:
+    - build-qemux86

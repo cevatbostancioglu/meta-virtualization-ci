@@ -251,6 +251,14 @@ DL_DIR = "/build/yocto_<MACHINE_NAME>"
 SSTATE_DIR ?= "${DL_DIR}/sstate-cache"
 TMPDIR = "${DL_DIR}/tmp"
 
+# for artifacts
+RM_OLD_IMAGE = "1"
+INHERIT += "rm_work"
+RM_WORK_EXCLUDE += " "
+INHERIT += "buildhistory"
+BUILDHISTORY_COMMIT = "1"
+
+####
 DISTRO_FEATURES_append = " virtualization "
 
 IMAGE_INSTALL_append = " openssh "

@@ -85,6 +85,16 @@ do_test_runqemu ()
 # MAIN
 ###############################################################################
 
+# Present usage.
+if [ $# -eq 0 ]; then
+    usage
+    exit 0
+fi
+
+if [ ! -d conf ]; then
+    cd yocto
+fi
+
 FAILED=1
 SUCCESS=0
 SHIFTCOUNT=0

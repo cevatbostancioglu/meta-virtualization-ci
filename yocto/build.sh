@@ -87,7 +87,6 @@ do_prep_host ()
 
     set +o nounset
 
-
     mkdir -p ${DOWNLOAD_PATH} || true
     mkdir -p ${SSTATE_DIR} || true
     mkdir -p ${TMPDIR} || true
@@ -137,6 +136,20 @@ do_runqemu ()
     echo "do_runqemu done"
 }
 
+do_take_release()
+{
+    echo "do_take_release start"
+
+    pushd ${DEPLOY_DIR}
+        rm -rf deploy.tar.gz || true
+        tar -cvzf deploy.tar.gz images licenses
+    popd
+
+    mv ${DEPLOY_DIR}/deploy.tar.gz ${PWD}/../
+
+    echo "do_take_release done"
+}
+
 ###############################################################################
 # MAIN
 ###############################################################################
@@ -145,6 +158,10 @@ do_runqemu ()
 if [ $# -eq 0 ]; then
     usage
     exit 0
+fi
+
+if [ ! -d conf ]; then
+    cd yocto
 fi
 
 SHIFTCOUNT=0
@@ -203,6 +220,11 @@ while true ; do
         bitbake-fetch)
             do_prep_host ${2:-master}
             do_bitbake_fetch
+            shift
+            break
+            ;;
+        take-release)
+            do_take_release
             shift
             break
             ;;
