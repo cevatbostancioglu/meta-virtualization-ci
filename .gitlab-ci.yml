@@ -9,24 +9,28 @@ linter:
   script:
     - source scripts/linter.sh commit-msg
     - source scripts/linter.sh json
+  interruptible: true
 
 fetch-qemuarm:
   stage: fetch
   script:
     - bash yocto/build.sh -a arm -m qemuarm meta-fetch ${CI_COMMIT_REF_NAME}
     - bash yocto/build.sh -a arm -m qemuarm bitbake-fetch master
+  interruptible: false
 
 fetch-qemux86:
   stage: fetch
   script:
     - bash yocto/build.sh -a amd64 -m qemux86 meta-fetch ${CI_COMMIT_REF_NAME}
     - bash yocto/build.sh -a amd64 -m qemux86 bitbake-fetch master 
+  interruptible: false
 
 build-qemuarm:
   stage: build
   script:
     - bash yocto/build.sh -a arm -m qemuarm build master
     - bash yocto/build.sh -a arm -m qemuarm take-release
+  interruptible: false
   dependencies:
     - fetch-qemuarm
   artifacts:
@@ -40,6 +44,7 @@ build-qemux86:
   script:
     - bash yocto/build.sh -a amd64 -m qemux86 build master
     - bash yocto/build.sh -a arm -m qemuarm take-release
+  interruptible: false
   dependencies:
     - fetch-qemux86
   artifacts:
@@ -53,6 +58,7 @@ run-qemuarm:
   script:
   - bash yocto/build.sh -a arm -m qemuarm runqemu
   - bash yocto/test.sh -a arm -m qemuarm runqemu
+  interruptible: true
   dependencies:
     - build-qemuarm
   timeout: 5m
@@ -62,6 +68,7 @@ run-qemux86:
   script:
   - bash yocto/build.sh -a amd64 -m qemux86 runqemu
   - bash yocto/test.sh -a amd64 -m qemux86 runqemu
+  interruptible: true
   dependencies:
     - build-qemux86
   timeout: 5m
