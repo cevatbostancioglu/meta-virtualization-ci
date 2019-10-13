@@ -17,8 +17,8 @@ stages:
 linter:
   stage: linter
   script:
-    - source scripts/linter.sh commit-msg
-    - source scripts/linter.sh json
+    - bash scripts/linter.sh commit-msg
+    - bash scripts/linter.sh json
   interruptible: true
 
 fetch-qemuarm:
