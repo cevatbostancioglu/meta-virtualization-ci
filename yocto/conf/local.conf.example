@@ -247,9 +247,9 @@ PACKAGECONFIG_append_pn-nativesdk-qemu = " sdl"
 CONF_VERSION = "1"
 MACHINE="<MACHINE_NAME>"
 
-DL_DIR = "/build/yocto_<MACHINE_NAME>"
-SSTATE_DIR ?= "${DL_DIR}/sstate-cache"
-TMPDIR = "${DL_DIR}/tmp"
+DL_DIR = "/build/<TARGET_ARCH>/downloads"
+SSTATE_DIR = "/build/<TARGET_ARCH>/<MACHINE_NAME>/<CACHE_POLICY>/sstate-cache"
+TMPDIR = "/build/<TARGET_ARCH>/<MACHINE_NAME>/<CACHE_POLICY>/tmp"
 
 # for artifacts
 RM_OLD_IMAGE = "1"

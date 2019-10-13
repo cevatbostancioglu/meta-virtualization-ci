@@ -48,14 +48,24 @@ do_meta_fetch ()
 
     if [ ! -d poky ]; then
         git clone -b ${1} git://git.yoctoproject.org/poky
+    else
+        cd poky
+        git checkout ${1}
     fi
 
     if [ ! -d meta-openembedded ]; then
         git clone -b ${1} git://git.openembedded.org/meta-openembedded
+    else
+        cd meta-openembedded
+        git checkout ${1}
     fi
 
+    ## other layers are not working good/maintained.
     if [ ! -d meta-virtualization ]; then
         git clone -b master git://git.yoctoproject.org/meta-virtualization
+    else
+        cd meta-virtualization
+        git checkout master
     fi
 
     popd
@@ -98,8 +108,12 @@ do_prep_host ()
     cp ${YOCTO_DIR}/conf/${TARGET_ARCH}/local_conf_* ${BUILD_DIR}/conf/
 
     sed_command="${1}"
-    sed -i "s/<git_branch>/$sed_command/g" "${BUILD_DIR}/conf/local.conf"
-    sed -i "s/<MACHINE_NAME>/${MACHINE_NAME}/g" "${BUILD_DIR}/conf/local.conf"
+    sed -i "s|<git_branch>|$sed_command|g" "${BUILD_DIR}/conf/local.conf"
+    sed -i "s|<MACHINE_NAME>|${MACHINE_NAME}|g" "${BUILD_DIR}/conf/local.conf"
+    sed -i "s|<TARGET_ARCH>|${TARGET_ARCH}|g" "${BUILD_DIR}/conf/local.conf"
+    sed -i "s|<CACHE_POLICY>|${CACHE_POLICY}|g" "${BUILD_DIR}/conf/local.conf"
+
+    sed -i "s|<DL_DIR>|${DOWNLOAD_PATH}|g" "${BUILD_DIR}/conf/bblayers.conf"
 
     popd
 
@@ -161,6 +175,8 @@ if [ ! -d conf ]; then
 fi
 
 SHIFTCOUNT=0
+TARGET_ARCH=${TARGET_ARCH:-arm}
+MACHINE_NAME=${MACHINE_NAME:-qemuarm}
 
 while getopts ":h?:o:f:m:p:c:i:a:" opt; do
     case "${opt:-}" in
@@ -202,8 +218,10 @@ done
 source ${PWD}/.config
 
 mkdir -p ${DOWNLOAD_PATH} || true
+mkdir -p ${BUILD_DIR} || true
 mkdir -p ${SSTATE_DIR} || true
 mkdir -p ${TMPDIR} || true
+mkdir -p ${DEPLOY_DIR} || true
 
 shift $SHIFTCOUNT
 
