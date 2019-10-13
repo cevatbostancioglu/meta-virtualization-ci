@@ -4,6 +4,16 @@ stages:
   - build
   - run-test
 
+.arm-config:
+  variables:
+    TARGET_ARCH: "arm"
+    MACHINE_NAME: "qemuarm"
+
+.amd64-config:
+  variables:
+    TARGET_ARCH: "amd64"
+    MACHINE_NAME: "qemux86"
+
 linter:
   stage: linter
   script:
@@ -12,24 +22,27 @@ linter:
   interruptible: true
 
 fetch-qemuarm:
+  extends: .arm-config
   stage: fetch
   script:
-    - bash yocto/build.sh -a arm -m qemuarm meta-fetch ${CI_COMMIT_REF_NAME}
-    - bash yocto/build.sh -a arm -m qemuarm bitbake-fetch master
+    - bash yocto/build.sh meta-fetch ${CI_COMMIT_REF_NAME}
+    - bash yocto/build.sh bitbake-fetch master
   interruptible: false
 
 fetch-qemux86:
+  extends: .amd64-config
   stage: fetch
   script:
-    - bash yocto/build.sh -a amd64 -m qemux86 meta-fetch ${CI_COMMIT_REF_NAME}
-    - bash yocto/build.sh -a amd64 -m qemux86 bitbake-fetch master 
+    - bash yocto/build.sh meta-fetch ${CI_COMMIT_REF_NAME}
+    - bash yocto/build.sh bitbake-fetch master 
   interruptible: false
 
 build-qemuarm:
+  extends: .arm-config
   stage: build
   script:
-    - bash yocto/build.sh -a arm -m qemuarm build master
-    - bash yocto/build.sh -a arm -m qemuarm take-release
+    - bash yocto/build.sh build master
+    - bash yocto/build.sh take-release
   interruptible: false
   dependencies:
     - fetch-qemuarm
@@ -40,10 +53,11 @@ build-qemuarm:
     expire_in: 15 mins
 
 build-qemux86:
+  extends: .amd64-config
   stage: build
   script:
-    - bash yocto/build.sh -a amd64 -m qemux86 build master
-    - bash yocto/build.sh -a arm -m qemuarm take-release
+    - bash yocto/build.sh build master
+    - bash yocto/build.sh take-release
   interruptible: false
   dependencies:
     - fetch-qemux86
@@ -54,20 +68,22 @@ build-qemux86:
     expire_in: 15 mins
 
 run-qemuarm:
+  extends: .arm-config
   stage: run-test
   script:
-  - bash yocto/build.sh -a arm -m qemuarm runqemu
-  - bash yocto/test.sh -a arm -m qemuarm runqemu
+  - bash yocto/build.sh runqemu
+  - bash yocto/test.sh runqemu
   interruptible: true
   dependencies:
     - build-qemuarm
   timeout: 5m
 
 run-qemux86:
+  extends: .amd64-config
   stage: run-test
   script:
-  - bash yocto/build.sh -a amd64 -m qemux86 runqemu
-  - bash yocto/test.sh -a amd64 -m qemux86 runqemu
+  - bash yocto/build.sh runqemu
+  - bash yocto/test.sh runqemu
   interruptible: true
   dependencies:
     - build-qemux86

@@ -165,8 +165,6 @@ if [ ! -d conf ]; then
 fi
 
 SHIFTCOUNT=0
-TARGET_ARCH="arm"
-MACHINE_NAME="qemuarm"
 
 while getopts ":h?:o:f:m:p:c:i:a:" opt; do
     case "${opt:-}" in

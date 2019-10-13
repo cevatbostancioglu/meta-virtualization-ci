@@ -98,8 +98,6 @@ fi
 FAILED=1
 SUCCESS=0
 SHIFTCOUNT=0
-TARGET_ARCH="arm"
-MACHINE_NAME="qemuarm"
 
 while getopts ":h?:a:m:" opt; do
     case "${opt:-}" in
