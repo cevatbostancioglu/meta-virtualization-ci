@@ -55,6 +55,7 @@ run-qemuarm:
   - bash yocto/test.sh -a arm -m qemuarm runqemu
   dependencies:
     - build-qemuarm
+  timeout: 5m
 
 run-qemux86:
   stage: run-test
@@ -63,3 +64,4 @@ run-qemux86:
   - bash yocto/test.sh -a amd64 -m qemux86 runqemu
   dependencies:
     - build-qemux86
+  timeout: 5m
