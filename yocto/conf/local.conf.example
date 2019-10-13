@@ -259,9 +259,12 @@ INHERIT += "buildhistory"
 BUILDHISTORY_COMMIT = "1"
 
 ####
-DISTRO_FEATURES_append = " virtualization "
+DISTRO_FEATURES_append = " virtualization"
+DISTRO_FEATURES_append = " systemd autostart-demo"
+VIRTUAL-RUNTIME_init_manager = "systemd"
+VIRTUAL-RUNTIME_initscripts = "systemd-compat-units"
 
-IMAGE_INSTALL_append = " openssh "
+IMAGE_INSTALL_append = " openssh systemd "
 
 include local_conf_<git_branch>.inc
 
