@@ -24,7 +24,8 @@ stages:
       - .gitlab-ci.yml
       - scripts/tests/*.*
 
-# artifact policy
+# artifact policy deploy/log
+# deploy
 .feature-deploy-artifact-policy:
   except:
     refs:
@@ -37,10 +38,10 @@ stages:
     expire_in: 15 mins
 
 .dev-deploy-artifact-policy:
-    only:
-        refs:
-          dev
-    artifacts:
+  only:
+    refs:
+      - dev
+  artifacts:
     paths:
       - deploy.tar.gz
     when: on_success
@@ -49,13 +50,14 @@ stages:
 .master-deploy-artifact-policy:
   only:
     refs:
-      master
+      - master
   artifacts:
     paths:
       - deploy.tar.gz
     when: on_success
     expire_in: 10 year
 
+# log
 .feature-log-artifact-policy:
   except:
     refs:
@@ -67,7 +69,7 @@ stages:
     when: on_success
     expire_in: 60 mins
 
-.dev-deploy-artifact-policy:
+.dev-log-artifact-policy:
   only:
     refs:
       - dev
@@ -77,7 +79,7 @@ stages:
     when: on_success
     expire_in: 10 year
   
-.master-deploy-artifact-policy:
+.master-log-artifact-policy:
   only:
     refs:
       - master
