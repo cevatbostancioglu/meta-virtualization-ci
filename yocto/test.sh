@@ -58,11 +58,34 @@ do_check_device_is_opening ()
     fi
 }
 
+do_copy_file()
+{
+    echo "do_copy_file start"
+
+    scp ${QEMU_SSH_OPTION} ${QEMU_MACHINE_USER}@${QEMU_MACHINE_IP}:${1} ${PWD}
+
+    echo "do_copy_file done"
+}
+
+do_run_command()
+{
+    echo "do_run_command start"
+
+    touch ${2} || true
+    ssh ${QEMU_SSH_OPTION} ${QEMU_MACHINE_USER}@${QEMU_MACHINE_IP} "${1}" > ${2}
+
+    echo "do_run_command done"
+}
+
 do_copy_logs()
 {
     echo "do_copy_logs start"
 
-    scp ${QEMU_SSH_OPTION} ${QEMU_MACHINE_USER}@${QEMU_MACHINE_IP}:/var/log/* ${PWD}
+    pushd test_result
+        do_copy_file "/var/log/messages"
+        do_run_command "dmesg" "dmesg"
+        do_run_command "systemctl list-unit-files" "list-unit-files"
+    popd
 
     echo "do_copy_logs done"
 }
@@ -73,16 +96,23 @@ do_test_runqemu ()
 
     do_check_device_is_opening
 
+    rm -rf test_result
+    mkdir -p test_result || true
+
     do_copy_logs
 
-    rm -rf test_result.txt || true
-    touch test_result.txt || true
+    touch test_result/bats_result.txt || true
 
     ## always continue
     test_result=$(bats ../scripts/tests/login.bats || true)
-    echo "$test_result" > test_result.txt
+    echo "$test_result" > test_result/bats_result.txt
 
     test_result=$(echo $test_result | grep "not ok" | wc -l)
+
+    rm -rf device_report.tar.gz || true
+    tar -cvzf device_report.tar.gz test_result
+
+    mv ${DEPLOY_DIR}/device_report.tar.gz ${PWD}/../
 
     if [ "$test_result" -eq 0 ]; then
         echo "ALL TESTS PASSED"

@@ -146,14 +146,14 @@ do_runqemu ()
     
     sleep 5
 
-    result=$(cat ${QEMU_NAMED_OUT} | grep "failed" | wc -l)
+    result=$(ps -ax | grep "[s]cripts/runqemu" | wc -l)
 
     if [ "$result" -eq 0 ]; then
-        echo "running QEMU:${MACHINE_NAME} success"
-        exit 0
-    else
         echo "running QEMU:${MACHINE_NAME} failed."
         exit 1
+    else
+        echo "running QEMU:${MACHINE_NAME} success"
+        exit 0
     fi
 
     echo "do_runqemu done"

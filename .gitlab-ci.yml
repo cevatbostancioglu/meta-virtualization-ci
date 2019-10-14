@@ -65,8 +65,7 @@ stages:
       - dev
   artifacts:
     paths:
-      - deploy.tar.gz
-    when: on_success
+      - device_report.tar.gz
     expire_in: 60 mins
 
 .dev-log-artifact-policy:
@@ -75,8 +74,7 @@ stages:
       - dev
   artifacts:
     paths:
-      - deploy.tar.gz
-    when: on_success
+      - device_report.tar.gz
     expire_in: 10 year
   
 .master-log-artifact-policy:
@@ -85,8 +83,7 @@ stages:
       - master
   artifacts:
     paths:
-      - deploy.tar.gz
-    when: on_success
+      - device_report.tar.gz
     expire_in: 10 year
 
 ### end of artifact policy
