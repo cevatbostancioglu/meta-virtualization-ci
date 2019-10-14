@@ -8,11 +8,12 @@ BBPATH = "${TOPDIR}"
 BBFILES ?= ""
 
 BBLAYERS ?= " \
-  ${BSPDIR}/poky/meta \
-  ${BSPDIR}/poky/meta-poky \
-  ${BSPDIR}/meta-virtualization \
-  ${BSPDIR}/meta-openembedded/meta-filesystems \
-  ${BSPDIR}/meta-openembedded/meta-oe \
-  ${BSPDIR}/meta-openembedded/meta-python \
-  ${BSPDIR}/meta-openembedded/meta-networking \
+  <DL_DIR>/poky/meta \
+  <DL_DIR>/poky/meta-poky \
+  <DL_DIR>/meta-openembedded/meta-filesystems \
+  <DL_DIR>/meta-openembedded/meta-oe \
+  <DL_DIR>/meta-openembedded/meta-python \
+  <DL_DIR>/meta-openembedded/meta-networking \
   "
+
+#${BSPDIR}/meta-virtualization 

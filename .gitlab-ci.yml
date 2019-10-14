@@ -1,0 +1,297 @@
+stages:
+  - linter
+  - fetch
+  - build
+  - run
+  - test
+
+# yocto arch/machine configs
+.arm-config:
+  variables:
+    TARGET_ARCH: "arm"
+    MACHINE_NAME: "qemuarm"
+  only:
+    changes:
+      - yocto/conf/arm/*.inc
+      - yocto/conf/bblayers.conf.example
+
+.amd64-config:
+  variables:
+    TARGET_ARCH: "amd64"
+    MACHINE_NAME: "qemux86"
+  only:
+    changes:
+      - yocto/conf/amd64/*.inc
+      - yocto/conf/bblayers.conf.example
+    refs:
+      - disable-amd64
+
+# run-test stages minimal job run
+.run-test-changes-policy:
+  only:
+    changes:
+      - yocto/*.*
+      - .gitlab-ci.yml
+      - scripts/tests/*.*
+
+# artifact policy deploy/log
+# deploy
+.feature-deploy-artifact-policy:
+  except:
+    refs:
+      - master
+      - dev
+  artifacts:
+    when: on_success
+    expire_in: 15 mins
+
+.dev-deploy-artifact-policy:
+  only:
+    refs:
+      - dev
+  artifacts:
+    when: on_success
+    expire_in: 1 week
+  
+.master-deploy-artifact-policy:
+  only:
+    refs:
+      - master
+  artifacts:
+    when: on_success
+    expire_in: 10 year
+
+# log
+.feature-log-artifact-policy:
+  except:
+    refs:
+      - master
+      - dev
+  artifacts:
+    expire_in: 60 mins
+
+.dev-log-artifact-policy:
+  only:
+    refs:
+      - dev
+  artifacts:
+    expire_in: 10 year
+  
+.master-log-artifact-policy:
+  only:
+    refs:
+      - master
+  artifacts:
+    expire_in: 10 year
+
+### end of artifact policy
+
+## linter stage
+linter:
+  stage: linter
+  script:
+    - bash scripts/linter.sh commit-msg
+    - bash scripts/linter.sh json
+  interruptible: true
+
+## fetch stage
+fetch-qemuarm:
+  extends: .arm-config
+  stage: fetch
+  script:
+    - bash yocto/build.sh meta-fetch thud
+    - bash yocto/build.sh bitbake-fetch master
+  interruptible: false
+  only:
+    changes:
+      - yocto/*.*
+      - .gitlab-ci.yml
+
+fetch-qemux86:
+  extends: .amd64-config
+  stage: fetch
+  script:
+    - bash yocto/build.sh meta-fetch thud
+    - bash yocto/build.sh bitbake-fetch master 
+  interruptible: false
+  only:
+    changes:
+      - yocto/*.*
+      - .gitlab-ci.yml
+
+## build arm/x86/doc feature/dev/master
+.build-qemuarm:
+  extends: .arm-config
+  stage: build
+  script:
+    - bash yocto/build.sh build master
+    - bash yocto/build.sh take-release
+  interruptible: false
+  dependencies:
+    - fetch-qemuarm
+  only:
+    changes:
+      - yocto/*.*
+      - .gitlab-ci.yml
+  artifacts:
+    paths:
+      - deploy.tar.gz
+
+.build-qemux86:
+  extends: .amd64-config
+  stage: build
+  script:
+    - bash yocto/build.sh build master
+    - bash yocto/build.sh take-release
+  interruptible: false
+  dependencies:
+    - fetch-qemux86
+  only:
+    changes:
+      - yocto/*.*
+      - .gitlab-ci.yml
+  artifacts:
+    paths:
+      - deploy.tar.gz
+
+.build-docs:
+  stage: build
+  script:
+    - pandoc docs/ProgressReport.md -o ProgressReport.pdf
+    - mdspell --ignore-numbers --ignore-acronyms --en-us --report docs/ProgressReport.md > spell_check_report.log || true
+  only:
+    changes:
+      - docs/*.md
+  artifacts:
+    paths:
+      - spell_check_report.log
+      - ProgressReport.pdf
+
+build-qemuarm-feature:
+  extends: 
+    - .feature-deploy-artifact-policy
+    - .build-qemuarm
+
+build-qemuarm-dev:
+  extends: 
+    - .dev-deploy-artifact-policy
+    - .build-qemuarm
+
+build-qemuarm-master:
+  extends: 
+    - .master-deploy-artifact-policy
+    - .build-qemuarm
+
+build-qemux86-feature:
+  extends: 
+    - .feature-deploy-artifact-policy
+    - .build-qemux86
+
+build-qemux86-dev:
+  extends: 
+    - .dev-deploy-artifact-policy
+    - .build-qemux86
+
+build-qemux86-master:
+  extends: 
+    - .master-deploy-artifact-policy
+    - .build-qemux86
+
+build-docs-feature:
+  extends: 
+    - .feature-log-artifact-policy
+    - .build-docs
+
+build-docs-dev:
+  extends: 
+    - .dev-log-artifact-policy
+    - .build-docs
+
+build-docs-master:
+  extends: 
+    - .master-log-artifact-policy
+    - .build-docs
+
+# run arm/x86 feature/dev/master
+run-qemuarm:
+  extends: 
+    - .arm-config
+    - .run-test-changes-policy
+  stage: run
+  script:
+  - bash yocto/build.sh runqemu
+  interruptible: false
+  timeout: 1m
+
+run-qemux86:
+  extends: 
+    - .amd64-config
+    - .run-test-changes-policy
+  stage: run
+  script:
+  - bash yocto/build.sh runqemu
+  interruptible: false
+  timeout: 1m
+
+# test arm/x86 feature/dev/master
+.test-qemuarm:
+  extends: 
+    - .arm-config
+    - .run-test-changes-policy
+  stage: test
+  dependencies:
+    - run-qemuarm
+  script:
+    - bash yocto/test.sh runqemu
+  interruptible: false
+  timeout: 5m
+  artifacts:
+    paths:
+      - device_report.tar.gz
+
+.test-qemux86:
+  extends: 
+    - .amd64-config
+    - .run-test-changes-policy
+  stage: test
+  dependencies:
+    - run-qemux86
+  script:
+    - bash yocto/test.sh runqemu
+  interruptible: false
+  timeout: 5m
+  artifacts:
+    paths:
+      - device_report.tar.gz
+
+test-qemuarm-feature:
+  extends:
+    - .feature-log-artifact-policy
+    - .test-qemuarm
+
+test-qemuarm-dev:
+  extends:
+    - .dev-log-artifact-policy
+    - .test-qemuarm
+
+test-qemuarm-master:
+  extends:
+    - .master-log-artifact-policy
+    - .test-qemuarm
+
+test-qemux86-feature:
+  extends:
+    - .feature-log-artifact-policy
+    - .test-qemux86
+
+test-qemux86-dev:
+  extends:
+    - .dev-log-artifact-policy
+    - .test-qemux86
+
+test-qemux86-master:
+  extends:
+    - .master-log-artifact-policy
+    - .test-qemux86
+
+

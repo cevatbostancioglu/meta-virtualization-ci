@@ -8,3 +8,5 @@ yocto/meta-virtualization/
 yocto/poky/
 
 build_*/
+
+test_result/
