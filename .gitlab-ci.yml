@@ -32,8 +32,6 @@ stages:
       - master
       - dev
   artifacts:
-    paths:
-      - deploy.tar.gz
     when: on_success
     expire_in: 15 mins
 
@@ -42,8 +40,6 @@ stages:
     refs:
       - dev
   artifacts:
-    paths:
-      - deploy.tar.gz
     when: on_success
     expire_in: 1 week
   
@@ -52,8 +48,6 @@ stages:
     refs:
       - master
   artifacts:
-    paths:
-      - deploy.tar.gz
     when: on_success
     expire_in: 10 year
 
@@ -64,8 +58,6 @@ stages:
       - master
       - dev
   artifacts:
-    paths:
-      - device_report.tar.gz
     expire_in: 60 mins
 
 .dev-log-artifact-policy:
@@ -73,8 +65,6 @@ stages:
     refs:
       - dev
   artifacts:
-    paths:
-      - device_report.tar.gz
     expire_in: 10 year
   
 .master-log-artifact-policy:
@@ -82,8 +72,6 @@ stages:
     refs:
       - master
   artifacts:
-    paths:
-      - device_report.tar.gz
     expire_in: 10 year
 
 ### end of artifact policy
@@ -121,7 +109,7 @@ fetch-qemux86:
       - yocto/*.*
       - .gitlab-ci.yml
 
-## build arm/x86 feature/dev/master
+## build arm/x86/doc feature/dev/master
 .build-qemuarm:
   extends: .arm-config
   stage: build
@@ -135,6 +123,9 @@ fetch-qemux86:
     changes:
       - yocto/*.*
       - .gitlab-ci.yml
+  artifacts:
+    paths:
+      - deploy.tar.gz
 
 .build-qemux86:
   extends: .amd64-config
@@ -149,6 +140,22 @@ fetch-qemux86:
     changes:
       - yocto/*.*
       - .gitlab-ci.yml
+  artifacts:
+    paths:
+      - deploy.tar.gz
+
+.build-docs:
+  stage: build
+  script:
+    - pandoc docs/ProgressReport.md -o ProgressReport.pdf
+    - mdspell --ignore-numbers --ignore-acronyms --en-us --report docs/ProgressReport.md > spell_check_report.log || true
+  only:
+    changes:
+      - docs/*.md
+  artifacts:
+    paths:
+      - spell_check_report.log
+      - ProgressReport.pdf
 
 build-qemuarm-feature:
   extends: 
@@ -179,6 +186,21 @@ build-qemux86-master:
   extends: 
     - .master-deploy-artifact-policy
     - .build-qemux86
+
+build-docs-feature:
+  extends: 
+    - .feature-log-artifact-policy
+    - .build-docs
+
+build-docs-dev:
+  extends: 
+    - .dev-log-artifact-policy
+    - .build-docs
+
+build-docs-master:
+  extends: 
+    - .master-log-artifact-policy
+    - .build-docs
 
 # run arm/x86 feature/dev/master
 run-qemuarm:
@@ -213,6 +235,9 @@ run-qemux86:
     - bash yocto/test.sh runqemu
   interruptible: false
   timeout: 5m
+  artifacts:
+    paths:
+      - device_report.tar.gz
 
 .test-qemux86:
   extends: 
@@ -225,6 +250,9 @@ run-qemux86:
     - bash yocto/test.sh runqemu
   interruptible: false
   timeout: 5m
+  artifacts:
+    paths:
+      - device_report.tar.gz
 
 test-qemuarm-feature:
   extends:

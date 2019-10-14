@@ -62,3 +62,16 @@ apt-get install -y yum
 git clone https://github.com/sstephenson/bats.git
 cd bats
 ./install.sh /usr/local
+
+### DOCS build
+# spelling
+apt-get install -y nodejs node.js 
+apt-get install -y npm
+npm install -g markdown-spellcheck --ignore-scripts
+npm install -g remarkable --ignore-scripts
+ln -s /usr/bin/nodejs /usr/bin/node
+# pdf
+apt-get install -y pandoc texlive-latex-base texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra
+
+
+exit 0
