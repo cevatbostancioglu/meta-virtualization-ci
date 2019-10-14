@@ -4,6 +4,7 @@ stages:
   - build
   - run-test
 
+# yocto arch/machine configs
 .arm-config:
   variables:
     TARGET_ARCH: "arm"
@@ -13,6 +14,69 @@ stages:
   variables:
     TARGET_ARCH: "amd64"
     MACHINE_NAME: "qemux86"
+
+# artifact policy
+.feature-deploy-artifact-policy:
+  except:
+    refs:
+      - master
+      - dev
+  artifacts:
+    paths:
+      - deploy.tar.gz
+    when: on_success
+    expire_in: 15 mins
+
+.dev-deploy-artifact-policy:
+    only:
+        refs:
+          dev
+    artifacts:
+    paths:
+      - deploy.tar.gz
+    when: on_success
+    expire_in: 1 week
+  
+.master-deploy-artifact-policy:
+  only:
+    refs:
+      master
+  artifacts:
+    paths:
+      - deploy.tar.gz
+    when: on_success
+    expire_in: 10 year
+
+.feature-log-artifact-policy:
+  except:
+    refs:
+      - master
+      - dev
+  artifacts:
+    paths:
+      - deploy.tar.gz
+    when: on_success
+    expire_in: 60 mins
+
+.dev-deploy-artifact-policy:
+  only:
+    refs:
+      - dev
+  artifacts:
+    paths:
+      - deploy.tar.gz
+    when: on_success
+    expire_in: 10 year
+  
+.master-deploy-artifact-policy:
+  only:
+    refs:
+      - master
+  artifacts:
+    paths:
+      - deploy.tar.gz
+    when: on_success
+    expire_in: 10 year
 
 linter:
   stage: linter
@@ -45,7 +109,8 @@ fetch-qemux86:
       - yocto/*.*
       - .gitlab-ci.yml
 
-build-qemuarm:
+## build arm/x86 feature/dev/master
+.build-qemuarm:
   extends: .arm-config
   stage: build
   script:
@@ -54,17 +119,12 @@ build-qemuarm:
   interruptible: false
   dependencies:
     - fetch-qemuarm
-  artifacts:
-    paths:
-      - deploy.tar.gz
-    when: on_success
-    expire_in: 15 mins
   only:
     changes:
       - yocto/*.*
       - .gitlab-ci.yml
 
-build-qemux86:
+.build-qemux86:
   extends: .amd64-config
   stage: build
   script:
@@ -73,16 +133,42 @@ build-qemux86:
   interruptible: false
   dependencies:
     - fetch-qemux86
-  artifacts:
-    paths:
-      - deploy.tar.gz
-    when: on_success
-    expire_in: 15 mins
   only:
     changes:
       - yocto/*.*
       - .gitlab-ci.yml
 
+build-qemuarm-feature:
+  extends: 
+    - .feature-deploy-artifact-policy
+    - .build-qemuarm
+
+build-qemuarm-dev:
+  extends: 
+    - .dev-deploy-artifact-policy
+    - .build-qemuarm
+
+build-qemuarm-master:
+  extends: 
+    - .master-deploy-artifact-policy
+    - .build-qemuarm
+
+build-qemux86-feature:
+  extends: 
+    - .feature-deploy-artifact-policy
+    - .build-qemux86
+
+build-qemux86-dev:
+  extends: 
+    - .dev-deploy-artifact-policy
+    - .build-qemux86
+
+build-qemux86-master:
+  extends: 
+    - .master-deploy-artifact-policy
+    - .build-qemux86
+
+# run arm/x86 feature/dev/master
 run-qemuarm:
   extends: .arm-config
   stage: run-test
@@ -90,8 +176,6 @@ run-qemuarm:
   - bash yocto/build.sh runqemu
   - bash yocto/test.sh runqemu
   interruptible: true
-  dependencies:
-    - build-qemuarm
   timeout: 5m
   only:
     changes:
@@ -106,8 +190,6 @@ run-qemux86:
   - bash yocto/build.sh runqemu
   - bash yocto/test.sh runqemu
   interruptible: true
-  dependencies:
-    - build-qemux86
   timeout: 5m
   only:
     changes:
