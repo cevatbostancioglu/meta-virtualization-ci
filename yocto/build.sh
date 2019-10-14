@@ -143,6 +143,19 @@ do_runqemu ()
     echo "do_runqemu start"
     rm -rf ${QEMU_NAMED_OUT} || true
     runqemu ${MACHINE_NAME} nographic > ${QEMU_NAMED_OUT} &
+    
+    sleep 5
+
+    result=$(cat ${QEMU_NAMED_OUT} | grep "failed" | wc -l)
+
+    if [ "$result" -eq 0 ]; then
+        echo "running QEMU:${MACHINE_NAME} success"
+        exit 0
+    else
+        echo "running QEMU:${MACHINE_NAME} failed."
+        exit 1
+    fi
+
     echo "do_runqemu done"
 }
 

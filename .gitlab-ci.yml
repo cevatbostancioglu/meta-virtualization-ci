@@ -2,7 +2,8 @@ stages:
   - linter
   - fetch
   - build
-  - run-test
+  - run
+  - test
 
 # yocto arch/machine configs
 .arm-config:
@@ -14,6 +15,14 @@ stages:
   variables:
     TARGET_ARCH: "amd64"
     MACHINE_NAME: "qemux86"
+
+# run-test stages minimal job run
+.run-test-changes-policy:
+  only:
+    changes:
+      - yocto/*.*
+      - .gitlab-ci.yml
+      - scripts/tests/*.*
 
 # artifact policy
 .feature-deploy-artifact-policy:
@@ -78,6 +87,9 @@ stages:
     when: on_success
     expire_in: 10 year
 
+### end of artifact policy
+
+## linter stage
 linter:
   stage: linter
   script:
@@ -85,6 +97,7 @@ linter:
     - bash scripts/linter.sh json
   interruptible: true
 
+## fetch stage
 fetch-qemuarm:
   extends: .arm-config
   stage: fetch
@@ -169,30 +182,73 @@ build-qemux86-master:
     - .build-qemux86
 
 # run arm/x86 feature/dev/master
-run-qemuarm:
-  extends: .arm-config
-  stage: run-test
+.run-qemuarm:
+  extends: 
+    - .arm-config
+    - .run-test-changes-policy
+  stage: run
   script:
   - bash yocto/build.sh runqemu
-  - bash yocto/test.sh runqemu
-  interruptible: true
+  interruptible: false
   timeout: 5m
-  only:
-    changes:
-      - yocto/*.*
-      - .gitlab-ci.yml
-      - scripts/tests/*.*
 
-run-qemux86:
-  extends: .amd64-config
-  stage: run-test
+.run-qemux86:
+  extends: 
+    - .amd64-config
+    - .run-test-changes-policy
+  stage: run
   script:
   - bash yocto/build.sh runqemu
-  - bash yocto/test.sh runqemu
-  interruptible: true
+  interruptible: false
   timeout: 5m
-  only:
-    changes:
-      - yocto/*.*
-      - .gitlab-ci.yml
-      - scripts/tests/*.*
+
+run-qemuarm-feature:
+  extends:
+    - .feature-log-artifact-policy
+    - .run-qemuarm
+
+run-qemuarm-dev:
+  extends:
+    - .dev-log-artifact-policy
+    - .run-qemuarm
+
+run-qemuarm-master:
+  extends:
+    - .master-log-artifact-policy
+    - .run-qemuarm
+
+run-qemux86-feature:
+  extends:
+    - .feature-log-artifact-policy
+    - .run-qemux86
+
+run-qemux86-dev:
+  extends:
+    - .dev-log-artifact-policy
+    - .run-qemux86
+
+run-qemux86-master:
+  extends:
+    - .master-log-artifact-policy
+    - .run-qemux86
+
+test-qemuarm:
+  extends: 
+    - .arm-config
+    - .run-test-changes-policy
+  stage: test
+  script:
+    - bash yocto/test.sh runqemu
+  interruptible: false
+  timeout: 5m
+
+test-qemux86:
+  extends: 
+    - .amd64-config
+    - .run-test-changes-policy
+  stage: test
+  script:
+    - bash yocto/test.sh runqemu
+  interruptible: false
+  timeout: 5m
+
