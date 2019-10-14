@@ -184,7 +184,7 @@ build-qemux86-master:
     - .build-qemux86
 
 # run arm/x86 feature/dev/master
-.run-qemuarm:
+run-qemuarm:
   extends: 
     - .arm-config
     - .run-test-changes-policy
@@ -194,7 +194,7 @@ build-qemux86-master:
   interruptible: false
   timeout: 5m
 
-.run-qemux86:
+run-qemux86:
   extends: 
     - .amd64-config
     - .run-test-changes-policy
@@ -204,37 +204,8 @@ build-qemux86-master:
   interruptible: false
   timeout: 5m
 
-run-qemuarm-feature:
-  extends:
-    - .feature-log-artifact-policy
-    - .run-qemuarm
-
-run-qemuarm-dev:
-  extends:
-    - .dev-log-artifact-policy
-    - .run-qemuarm
-
-run-qemuarm-master:
-  extends:
-    - .master-log-artifact-policy
-    - .run-qemuarm
-
-run-qemux86-feature:
-  extends:
-    - .feature-log-artifact-policy
-    - .run-qemux86
-
-run-qemux86-dev:
-  extends:
-    - .dev-log-artifact-policy
-    - .run-qemux86
-
-run-qemux86-master:
-  extends:
-    - .master-log-artifact-policy
-    - .run-qemux86
-
-test-qemuarm:
+# test arm/x86 feature/dev/master
+.test-qemuarm:
   extends: 
     - .arm-config
     - .run-test-changes-policy
@@ -244,7 +215,7 @@ test-qemuarm:
   interruptible: false
   timeout: 5m
 
-test-qemux86:
+.test-qemux86:
   extends: 
     - .amd64-config
     - .run-test-changes-policy
@@ -253,4 +224,35 @@ test-qemux86:
     - bash yocto/test.sh runqemu
   interruptible: false
   timeout: 5m
+
+test-qemuarm-feature:
+  extends:
+    - .feature-log-artifact-policy
+    - .test-qemuarm
+
+test-qemuarm-dev:
+  extends:
+    - .dev-log-artifact-policy
+    - .test-qemuarm
+
+test-qemuarm-master:
+  extends:
+    - .master-log-artifact-policy
+    - .test-qemuarm
+
+test-qemux86-feature:
+  extends:
+    - .feature-log-artifact-policy
+    - .test-qemux86
+
+test-qemux86-dev:
+  extends:
+    - .dev-log-artifact-policy
+    - .test-qemux86
+
+test-qemux86-master:
+  extends:
+    - .master-log-artifact-policy
+    - .test-qemux86
+
 

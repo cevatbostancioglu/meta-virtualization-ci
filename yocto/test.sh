@@ -58,15 +58,29 @@ do_check_device_is_opening ()
     fi
 }
 
+do_copy_logs()
+{
+    echo "do_copy_logs start"
+
+    scp ${QEMU_SSH_OPTION} ${QEMU_MACHINE_USER}@${QEMU_MACHINE_IP}:/var/log/* ${PWD}
+
+    echo "do_copy_logs done"
+}
+
 do_test_runqemu ()
 {
     echo "do_test_runqemu start"
 
     do_check_device_is_opening
 
+    do_copy_logs
+
+    rm -rf test_result.txt || true
+    touch test_result.txt || true
+
     ## always continue
     test_result=$(bats ../scripts/tests/login.bats || true)
-    echo "$test_result" 
+    echo "$test_result" > test_result.txt
 
     test_result=$(echo $test_result | grep "not ok" | wc -l)
 
