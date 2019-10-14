@@ -189,7 +189,7 @@ run-qemuarm:
   script:
   - bash yocto/build.sh runqemu
   interruptible: false
-  timeout: 5m
+  timeout: 1m
 
 run-qemux86:
   extends: 
@@ -199,7 +199,7 @@ run-qemux86:
   script:
   - bash yocto/build.sh runqemu
   interruptible: false
-  timeout: 5m
+  timeout: 1m
 
 # test arm/x86 feature/dev/master
 .test-qemuarm:
@@ -207,6 +207,8 @@ run-qemux86:
     - .arm-config
     - .run-test-changes-policy
   stage: test
+  dependencies:
+    - run-qemuarm
   script:
     - bash yocto/test.sh runqemu
   interruptible: false
@@ -217,6 +219,8 @@ run-qemux86:
     - .amd64-config
     - .run-test-changes-policy
   stage: test
+  dependencies:
+    - run-qemux86
   script:
     - bash yocto/test.sh runqemu
   interruptible: false

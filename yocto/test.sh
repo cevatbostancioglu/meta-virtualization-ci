@@ -19,7 +19,7 @@ do_shutdown_qemu_resources ()
     echo "do_shutdown_qemu_resources start"
 
     ## if qemu is not open, script kill itself.
-    result=$(ps -ax  | grep qemu | grep -v $BASHPID | grep -v "test.sh") 
+    result=$(ps -ax  | grep ${MACHINE_NAME} | grep -v $BASHPID | grep -v "test.sh") 
     $(echo $result | awk '{print $1}' | xargs kill)
 
     if [ $? -eq 0 ]; then
@@ -40,6 +40,10 @@ do_check_device_is_opening ()
     END_DATE=$(( CURRENT_DATE+40 ))
 
     result=0
+
+    if [ ! -f ${QEMU_NAMED_OUT} ]; then
+        do_shutdown_qemu_resources $FAILED
+    fi
 
     while [ $CURRENT_DATE -le $END_DATE ];
     do

@@ -142,7 +142,10 @@ do_runqemu ()
 {
     echo "do_runqemu start"
     rm -rf ${QEMU_NAMED_OUT} || true
-    runqemu ${MACHINE_NAME} nographic > ${QEMU_NAMED_OUT} &
+
+    #https://gitlab.com/gitlab-org/gitlab-runner/issues/2231
+    #https://gitlab.com/gitlab-org/gitlab-runner/issues/3165
+    setsid nohup runqemu ${MACHINE_NAME} nographic > ${QEMU_NAMED_OUT} &
     
     sleep 5
 
