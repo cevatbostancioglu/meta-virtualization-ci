@@ -10,11 +10,21 @@ stages:
   variables:
     TARGET_ARCH: "arm"
     MACHINE_NAME: "qemuarm"
+  only:
+    changes:
+      - yocto/conf/arm/*.inc
+      - yocto/conf/bblayers.conf.example
 
 .amd64-config:
   variables:
     TARGET_ARCH: "amd64"
     MACHINE_NAME: "qemux86"
+  only:
+    changes:
+      - yocto/conf/amd64/*.inc
+      - yocto/conf/bblayers.conf.example
+    refs:
+      - disable-amd64
 
 # run-test stages minimal job run
 .run-test-changes-policy:
