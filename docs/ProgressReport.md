@@ -2,21 +2,24 @@ Project Decision:
 =================
 
 I choose my meta-virtualization-ci project for build pipeline. Reasons :
-- I know the tooling, language limits, environment, practices. - CI
-structure was missing part of most of the yocto layers/BSPs. - My CI
-structure was just building images, there was no automated testing,
+
+- I know the tooling, language limits, environment, practices. 
+- CI structure was missing part of most of the yocto layers/BSPs. 
+- My CI structure was just building images, there was no automated testing,
 linter, deploy, artifact kind of features. I was just loosing too much
-time. - Make that project structure done finally, everyone can add
+time. 
+- Make that project structure done finally, everyone can add
 tests/build steps easily.
 
 CI Infrastructure Decision:
 ===========================
 
-I choose Gitlab-CI for this assignment. Reasons: - I didn't use that
-before but i know it is very popular. I want to test/learn it. - Jenkins
-ci/cd infrastructures becomes plugin-hell pretty easily. Gitlab-ci logic
-is one package. i dont have to install many plugins. - I don't want to
-use third-party, version based tools, one basic package tool is fine for
+I choose Gitlab-CI for this assignment. Reasons: 
+
+- I didn't use that before but i know it is very popular. I want to test/learn it. 
+- Jenkins ci/cd infrastructures becomes plugin-hell pretty easily. Gitlab-ci logic
+is one package. i dont have to install many plugins. 
+- I don't want to use third-party, version based tools, one basic package tool is fine for
 me.
 
 What can i do decision:
