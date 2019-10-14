@@ -152,6 +152,23 @@ Artifact management policy:
 -   master branch artifacts will never expire. Log artifacts
     never expire.
 
+Issues:
+=======
+
+-   if qemu x86-arm machines try to run at the same time, they both try to get same ip addresses then test jobs failed. i disabled x86 builds since i am working on same machine. maybe yocto/runqemu patch can solve this error.
+-   qemu machine running sometimes ends with write-lock problem. we are not cleaning resource effective, sometimes machine cannot close itself properly. 
+-   gitlab-runner have problems with nohup outputs, because of qemu machine has to be in running state(background job), gitlab-runner cannot understand job is finished if jobs are running at background. docker cannot solve this but amd64-arm seperated dockers can contain systemd services, so gitlab-runner cannot check pids.
+
+Focus on assignment:
+====================
+
+- I mostly focus to make this assignment end-to-end functoinal.
+
+Timeline:
+=========
+
+- I started to working on this 5 days ago, 1 day reading/thinking and 4 day implementation. I worked 4-5 hours/day at weekday nights and 8-10 hours/day at weekend.
+
 I wish to do:
 =============
 
@@ -164,3 +181,8 @@ I wish to do:
     machines etc.
 -   code quality/coverage metrics. They are not common in yocto but
     maybe python linters will work.
+
+My feedback on assignment:
+==========================
+
+-   Really nice interview approach.
