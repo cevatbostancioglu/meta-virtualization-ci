@@ -116,7 +116,7 @@ do_test_runqemu ()
     rm -rf device_report.tar.gz || true
     tar -cvzf device_report.tar.gz test_result
 
-    mv ${DEPLOY_DIR}/device_report.tar.gz ${PWD}/../
+    mv *.tar.gz ../
 
     if [ "$test_result" -eq 0 ]; then
         echo "ALL TESTS PASSED"

@@ -168,7 +168,8 @@ do_take_release()
 
     pushd ${DEPLOY_DIR}
         rm -rf deploy.tar.gz || true
-        tar -cvzf deploy.tar.gz images licenses
+        #TODO: images folder takes lots of time to upload/download. just disable it for now.
+        tar -cvzf deploy.tar.gz  licenses
     popd
 
     mv ${DEPLOY_DIR}/deploy.tar.gz ${PWD}/../
