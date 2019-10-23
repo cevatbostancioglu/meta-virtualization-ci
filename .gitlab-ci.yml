@@ -2,7 +2,6 @@ stages:
   - linter
   - fetch
   - build
-  - run
   - test
 
 # yocto arch/machine configs
@@ -127,8 +126,6 @@ fetch-qemux86:
     - bash yocto/build.sh build master
     - bash yocto/build.sh take-release
   interruptible: false
-  dependencies:
-    - fetch-qemuarm
   only:
     changes:
       - yocto/*.*
@@ -144,8 +141,6 @@ fetch-qemux86:
     - bash yocto/build.sh build master
     - bash yocto/build.sh take-release
   interruptible: false
-  dependencies:
-    - fetch-qemux86
   only:
     changes:
       - yocto/*.*
@@ -212,36 +207,14 @@ build-docs-master:
     - .master-log-artifact-policy
     - .build-docs
 
-# run arm/x86 feature/dev/master
-run-qemuarm:
-  extends: 
-    - .arm-config
-    - .run-test-changes-policy
-  stage: run
-  script:
-  - bash yocto/build.sh runqemu
-  interruptible: false
-  timeout: 1m
-
-run-qemux86:
-  extends: 
-    - .amd64-config
-    - .run-test-changes-policy
-  stage: run
-  script:
-  - bash yocto/build.sh runqemu
-  interruptible: false
-  timeout: 1m
-
 # test arm/x86 feature/dev/master
 .test-qemuarm:
   extends: 
     - .arm-config
     - .run-test-changes-policy
   stage: test
-  dependencies:
-    - run-qemuarm
   script:
+    - bash yocto/build.sh runqemu
     - bash yocto/test.sh runqemu
   interruptible: false
   timeout: 5m
@@ -254,9 +227,8 @@ run-qemux86:
     - .amd64-config
     - .run-test-changes-policy
   stage: test
-  dependencies:
-    - run-qemux86
   script:
+    - bash yocto/build.sh runqemu
     - bash yocto/test.sh runqemu
   interruptible: false
   timeout: 5m
