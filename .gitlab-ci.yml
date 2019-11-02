@@ -22,8 +22,6 @@ stages:
     changes:
       - yocto/conf/amd64/*.inc
       - yocto/conf/bblayers.conf.example
-    refs:
-      - disable-amd64
 
 # run-test stages minimal job run
 .run-test-changes-policy:

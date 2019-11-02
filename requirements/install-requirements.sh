@@ -38,6 +38,8 @@ apt-get install -y gitlab-runner
 systemctl stop gitlab-runner
 cp gitlab-runner.service /etc/systemd/system/
 sed -i "s|\"--user\" \"gitlab-runner\"|\"--user\" \"${GITLABRUNNER_USER}\"|g" /etc/systemd/system/gitlab-runner.service
+chown -R ${GITLABRUNNER_USER}:${GITLABRUNNER_USER} /home/gitlab-runner
+systemctl daemon-reload
 systemctl restart gitlab-runner
 
 ### TAKE SUDO RIGHTS
@@ -72,6 +74,7 @@ npm install -g remarkable --ignore-scripts
 ln -s /usr/bin/nodejs /usr/bin/node
 # pdf
 apt-get install -y pandoc texlive-latex-base texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra
-
+# jsonlint-php
+apt-get install -y jsonlint
 
 exit 0
