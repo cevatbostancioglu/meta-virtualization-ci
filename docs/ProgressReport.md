@@ -149,7 +149,7 @@ Artifact management policy:
     commit artifact if you want. But it's not effective.
 -   i tried to use never expire in gitlab-ci but gitlab-ci throw errors. so i just set expire date to 10 years.
 -   feature/hotfix/fix/bug branchs pull requests/commits build artifacts
-    will expire in 15 minutes. Log artifacts expire 1 hour.
+    will expire in 10 hour. Log artifacts expire 10 hour.
 -   dev branchs artifacts will expire in 1 week. Log artifacts
     never expire.
 -   master branch artifacts will never expire. Log artifacts

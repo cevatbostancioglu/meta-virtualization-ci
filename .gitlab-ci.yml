@@ -40,7 +40,7 @@ stages:
       - dev
   artifacts:
     when: on_success
-    expire_in: 15 mins
+    expire_in: 10 hour
 
 .dev-deploy-artifact-policy:
   only:
@@ -65,7 +65,7 @@ stages:
       - master
       - dev
   artifacts:
-    expire_in: 60 mins
+    expire_in: 10 hour
 
 .dev-log-artifact-policy:
   only:
