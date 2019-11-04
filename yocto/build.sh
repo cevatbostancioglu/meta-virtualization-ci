@@ -8,9 +8,12 @@ echo "Syntax check started for $0. On any syntax error script will exit"
 bash -n $0 # check and exit for syntax errors in script.
 echo "Syntax is OK."
 
+echo "running with ${USER}"
+
 usage ()
 {
     echo "usage"    
+    exit 1
 }
 
 is_program_installed() {
@@ -22,7 +25,11 @@ is_program_installed() {
 
 do_env_check(){
     ENV_OK=1
+    
     is_program_installed sed
+    is_program_installed bats
+    is_program_installed jsonlint-php
+
     if [ $ENV_OK -eq 1 ]; then
         echo -e "\e[1;32m\nNo problems found on build environment.\n\e[0m"
     else
@@ -31,21 +38,51 @@ do_env_check(){
     fi
 }
 
-do_fetch ()
+do_meta_fetch ()
 {
-    echo "do_fetch start"
+    echo "do_meta_fetch start"
 
     do_env_check
     
-    cd ${YOCTO_DIR}
+    pushd ${DOWNLOAD_PATH}
 
-    git clone -b ${1} git://git.yoctoproject.org/poky
+    if [ ! -d poky ]; then
+        git clone -b ${1} git://git.yoctoproject.org/poky
+    else
+        cd poky
+        git checkout ${1}
+        cd ..
+    fi
 
-    git clone -b ${1} git://git.openembedded.org/meta-openembedded
+    if [ ! -d meta-openembedded ]; then
+        git clone -b ${1} git://git.openembedded.org/meta-openembedded
+    else
+        cd meta-openembedded
+        git checkout ${1}
+        cd ..
+    fi
 
-    git clone -b ${1} git://git.yoctoproject.org/meta-virtualization
+    ## other layers are not working good/maintained.
+    if [ ! -d meta-virtualization ]; then
+        git clone -b master git://git.yoctoproject.org/meta-virtualization
+    else
+        cd meta-virtualization
+        git checkout master
+        cd ..
+    fi
 
-    echo "do_fetch done"
+    popd
+
+    echo "do_meta_fetch done"
+}
+
+do_bitbake_fetch ()
+{
+    echo "do_bitbake_fetch start"
+
+    bitbake -c fetch ${IMAGE_NAME} 
+
+    echo "do_bitbake_fetch done"
 }
 
 do_clean ()
@@ -63,18 +100,25 @@ do_prep_host ()
 
     set +o nounset
 
-    source ${POKY_DIR}/oe-init-build-env build_${TARGET_ARCH}
+    pushd ${DOWNLOAD_PATH}
+
+    source ${POKY_DIR}/oe-init-build-env ${BUILD_DIR}
     
     cp ${YOCTO_DIR}/conf/bblayers.conf.example ${BUILD_DIR}/conf/bblayers.conf
 
-    cp ${YOCTO_DIR}/conf/${TARGET_ARCH}/local.conf.example ${BUILD_DIR}/conf/local.conf
+    cp ${YOCTO_DIR}/conf/local.conf.example ${BUILD_DIR}/conf/local.conf
 
     cp ${YOCTO_DIR}/conf/${TARGET_ARCH}/local_conf_* ${BUILD_DIR}/conf/
 
     sed_command="${1}"
-    sed -i "s/<git_branch>/$sed_command/g" "${BUILD_DIR}/conf/local.conf"
+    sed -i "s|<git_branch>|$sed_command|g" "${BUILD_DIR}/conf/local.conf"
+    sed -i "s|<MACHINE_NAME>|${MACHINE_NAME}|g" "${BUILD_DIR}/conf/local.conf"
+    sed -i "s|<TARGET_ARCH>|${TARGET_ARCH}|g" "${BUILD_DIR}/conf/local.conf"
+    sed -i "s|<CACHE_POLICY>|${CACHE_POLICY}|g" "${BUILD_DIR}/conf/local.conf"
 
-    mkdir -p ${DOWNLOAD_PATH} || true
+    sed -i "s|<DL_DIR>|${DOWNLOAD_PATH}|g" "${BUILD_DIR}/conf/bblayers.conf"
+
+    popd
 
     echo "do_prep_host done"
 }
@@ -99,7 +143,41 @@ do_custom_build ()
 
 do_runqemu ()
 {
-    runqemu qemuarm
+    echo "do_runqemu start"
+    rm -rf ${QEMU_NAMED_OUT} || true
+
+    #https://gitlab.com/gitlab-org/gitlab-runner/issues/2231
+    #https://gitlab.com/gitlab-org/gitlab-runner/issues/3165
+    setsid nohup runqemu ${MACHINE_NAME} nographic > ${QEMU_NAMED_OUT} &
+    
+    sleep 5
+
+    result=$(ps -ax | grep "[s]cripts/runqemu" | wc -l)
+
+    if [ "$result" -eq 0 ]; then
+        echo "running QEMU:${MACHINE_NAME} failed."
+        exit 1
+    else
+        echo "running QEMU:${MACHINE_NAME} success"
+        exit 0
+    fi
+
+    echo "do_runqemu done"
+}
+
+do_take_release()
+{
+    echo "do_take_release start"
+
+    pushd ${DEPLOY_DIR}
+        rm -rf deploy.tar.gz || true
+        #TODO: images folder takes lots of time to upload/download. just disable it for now.
+        tar -cvzf deploy.tar.gz  licenses
+    popd
+
+    mv ${DEPLOY_DIR}/deploy.tar.gz ${PWD}/../
+
+    echo "do_take_release done"
 }
 
 ###############################################################################
@@ -112,15 +190,23 @@ if [ $# -eq 0 ]; then
     exit 0
 fi
 
-source ${PWD}/.config
+if [ ! -d conf ]; then
+    cd yocto
+fi
 
 SHIFTCOUNT=0
+TARGET_ARCH=${TARGET_ARCH:-arm}
+MACHINE_NAME=${MACHINE_NAME:-qemuarm}
 
-while getopts ":h?:o:f:m:p:c:i:" opt; do
+while getopts ":h?:o:f:m:p:c:i:a:" opt; do
     case "${opt:-}" in
         h|\?)
             usage
             exit 0
+            ;;
+        a)
+            export TARGET_ARCH=$OPTARG
+            SHIFTCOUNT=$(( $SHIFTCOUNT+2 ))
             ;;
         o)
             export BUILD_TYPE=$OPTARG
@@ -149,13 +235,32 @@ while getopts ":h?:o:f:m:p:c:i:" opt; do
     esac
 done
 
+source ${PWD}/.config
+
+mkdir -p ${DOWNLOAD_PATH} || true
+mkdir -p ${BUILD_DIR} || true
+mkdir -p ${SSTATE_DIR} || true
+mkdir -p ${TMPDIR} || true
+mkdir -p ${DEPLOY_DIR} || true
+
 shift $SHIFTCOUNT
 
 # Process all commands.
 while true ; do
     case "$1" in
-        fetch)
-            do_fetch $2
+        meta-fetch)
+            do_meta_fetch $2
+            shift
+            break
+            ;;
+        bitbake-fetch)
+            do_prep_host ${2:-master}
+            do_bitbake_fetch
+            shift
+            break
+            ;;
+        take-release)
+            do_take_release
             shift
             break
             ;;
@@ -165,7 +270,7 @@ while true ; do
             break
             ;;
         runqemu)
-            do_prep_host
+            do_prep_host ${2:-master}
             do_runqemu
             shift
             break
@@ -176,7 +281,7 @@ while true ; do
             break
             ;;
         build)
-            do_prep_host $2
+            do_prep_host ${2:-master}
             do_build
             shift
             break

@@ -1,1 +1,1 @@
-IMAGE_INSTALL_append = " runv"
+IMAGE_INSTALL_append = " "
