@@ -51,6 +51,7 @@ do_meta_fetch ()
     else
         cd poky
         git checkout ${1}
+        cd ..
     fi
 
     if [ ! -d meta-openembedded ]; then
@@ -58,6 +59,7 @@ do_meta_fetch ()
     else
         cd meta-openembedded
         git checkout ${1}
+        cd ..
     fi
 
     ## other layers are not working good/maintained.
@@ -66,6 +68,7 @@ do_meta_fetch ()
     else
         cd meta-virtualization
         git checkout master
+        cd ..
     fi
 
     popd

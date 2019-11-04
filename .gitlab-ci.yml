@@ -22,8 +22,6 @@ stages:
     changes:
       - yocto/conf/amd64/*.inc
       - yocto/conf/bblayers.conf.example
-    refs:
-      - disable-amd64
 
 # run-test stages minimal job run
 .run-test-changes-policy:
@@ -42,7 +40,7 @@ stages:
       - dev
   artifacts:
     when: on_success
-    expire_in: 15 mins
+    expire_in: 10 hour
 
 .dev-deploy-artifact-policy:
   only:
@@ -67,7 +65,7 @@ stages:
       - master
       - dev
   artifacts:
-    expire_in: 60 mins
+    expire_in: 10 hour
 
 .dev-log-artifact-policy:
   only:
