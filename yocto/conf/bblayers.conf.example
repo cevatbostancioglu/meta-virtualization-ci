@@ -13,7 +13,9 @@ BBLAYERS ?= " \
   <DL_DIR>/meta-openembedded/meta-filesystems \
   <DL_DIR>/meta-openembedded/meta-oe \
   <DL_DIR>/meta-openembedded/meta-python \
+  <DL_DIR>/meta-openembedded/meta-multimedia \
   <DL_DIR>/meta-openembedded/meta-networking \
+  <DL_DIR>/meta-raspberrypi \
   "
 
 #${BSPDIR}/meta-virtualization 

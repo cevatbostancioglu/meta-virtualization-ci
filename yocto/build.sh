@@ -51,6 +51,7 @@ do_meta_fetch ()
     else
         cd poky
         git checkout ${1}
+        git fetch
         cd ..
     fi
 
@@ -59,15 +60,26 @@ do_meta_fetch ()
     else
         cd meta-openembedded
         git checkout ${1}
+        git fetch
+        cd ..
+    fi
+
+    if [ ! -d meta-raspberrypi ]; then
+        git clone -b ${1} git://git.yoctoproject.org/meta-raspberrypi
+    else
+        cd meta-raspberrypi
+        git checkout ${1}
+        git fetch
         cd ..
     fi
 
     ## other layers are not working good/maintained.
     if [ ! -d meta-virtualization ]; then
-        git clone -b master git://git.yoctoproject.org/meta-virtualization
+        git clone -b warrior git://git.yoctoproject.org/meta-virtualization
     else
         cd meta-virtualization
-        git checkout master
+        git checkout warrior
+        git fetch
         cd ..
     fi
 
@@ -196,7 +208,7 @@ fi
 
 SHIFTCOUNT=0
 TARGET_ARCH=${TARGET_ARCH:-arm}
-MACHINE_NAME=${MACHINE_NAME:-qemuarm}
+MACHINE_NAME=${MACHINE_NAME:-raspberrypi4-64}
 
 while getopts ":h?:o:f:m:p:c:i:a:" opt; do
     case "${opt:-}" in
