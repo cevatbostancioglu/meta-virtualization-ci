@@ -71,7 +71,7 @@ apt-get install -y nodejs node.js
 apt-get install -y npm
 npm install -g markdown-spellcheck --ignore-scripts
 npm install -g remarkable --ignore-scripts
-ln -s /usr/bin/nodejs /usr/bin/node
+ln -s /usr/bin/nodejs /usr/bin/node || true
 # pdf
 apt-get install -y pandoc texlive-latex-base texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra
 # jsonlint-php

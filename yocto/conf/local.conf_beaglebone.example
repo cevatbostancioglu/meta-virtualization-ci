@@ -1,0 +1,63 @@
+DISTRO ?= "poky"
+
+PACKAGE_CLASSES ?= "package_rpm"
+
+EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
+USER_CLASSES ?= "buildstats image-mklibs image-prelink"
+
+PATCHRESOLVE = "noop"
+
+BB_DISKMON_DIRS ??= "\
+    STOPTASKS,${TMPDIR},1G,100K \
+    STOPTASKS,${DL_DIR},1G,100K \
+    STOPTASKS,${SSTATE_DIR},1G,100K \
+    STOPTASKS,/tmp,100M,100K \
+    ABORT,${TMPDIR},100M,1K \
+    ABORT,${DL_DIR},100M,1K \
+    ABORT,${SSTATE_DIR},100M,1K \
+    ABORT,/tmp,10M,1K"
+
+PACKAGECONFIG_append_pn-qemu-native = " sdl"
+PACKAGECONFIG_append_pn-nativesdk-qemu = " sdl"
+
+CONF_VERSION = "1"
+MACHINE="<MACHINE_NAME>"
+
+DL_DIR = "/build/<TARGET_ARCH>/downloads"
+SSTATE_DIR = "/build/<TARGET_ARCH>/<MACHINE_NAME>/<CACHE_POLICY>/sstate-cache"
+TMPDIR = "/build/<TARGET_ARCH>/<MACHINE_NAME>/<CACHE_POLICY>/tmp"
+
+# for artifacts
+RM_OLD_IMAGE = "1"
+INHERIT += "rm_work"
+RM_WORK_EXCLUDE += " "
+INHERIT += "buildhistory"
+BUILDHISTORY_COMMIT = "1"
+
+####
+DISTRO_FEATURES_append = " systemd autostart-demo"
+VIRTUAL-RUNTIME_init_manager = "systemd"
+VIRTUAL-RUNTIME_initscripts = "systemd-compat-units"
+
+IMAGE_INSTALL_append = " openssh systemd "
+
+include local_conf_<git_branch>.inc
+
+BB_NUMBER_THREADS = "8"
+PARALLEL_MAKE = "-j 4"
+
+BBMASK = "meta-networking/recipes-kernel/wireguard"
+
+LICENSE_FLAGS_WHITELIST = "commercial"
+
+DISTRO_FEATURES = "ext2 usbhost ${DISTRO_FEATURES_LIBC}"
+
+# remove pulseaudio since it brings in x11
+DISTRO_FEATURES_BACKFILL_CONSIDERED += "pulseaudio opengl"
+
+PREFERRED_PROVIDER_jpeg = "libjpeg-turbo"
+
+PREFERRED_PROVIDER_udev = "eudev"
+#VIRTUAL-RUNTIME_init_manager = "sysvinit"
+
+

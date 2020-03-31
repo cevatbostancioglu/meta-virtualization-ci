@@ -1,0 +1,3 @@
+
+TARGET_ARCH=${TARGET_ARCH:-arm}
+IMAGE_NAME=${IMAGE_NAME:-console-image}

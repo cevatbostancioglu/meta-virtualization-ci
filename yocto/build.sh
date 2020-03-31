@@ -62,6 +62,38 @@ do_meta_fetch ()
         cd ..
     fi
 
+    if [ ! -d meta-bbb ]; then
+        git clone -b ${1} https://github.com/jumpnow/meta-bbb.git
+    else
+        cd meta-bbb
+        git checkout ${1}
+        cd ..
+    fi
+
+    if [ ! -d meta-qt5 ]; then
+        git clone -b ${1} https://github.com/meta-qt5/meta-qt5.git
+    else
+        cd meta-qt5
+        git checkout ${1}
+        cd ..
+    fi
+
+    if [ ! -d meta-security ]; then
+        git clone -b ${1} git://git.yoctoproject.org/meta-security.git
+    else
+        cd meta-security
+        git checkout ${1}
+        cd ..
+    fi
+
+    if [ ! -d meta-jumpnow ]; then
+        git clone -b ${1} https://github.com/jumpnow/meta-jumpnow.git
+    else
+        cd meta-jumpnow
+        git checkout ${1}
+        cd ..
+    fi
+
     ## other layers are not working good/maintained.
     if [ ! -d meta-virtualization ]; then
         git clone -b master git://git.yoctoproject.org/meta-virtualization
@@ -104,9 +136,9 @@ do_prep_host ()
 
     source ${POKY_DIR}/oe-init-build-env ${BUILD_DIR}
     
-    cp ${YOCTO_DIR}/conf/bblayers.conf.example ${BUILD_DIR}/conf/bblayers.conf
+    cp ${YOCTO_DIR}/conf/bblayers.conf.example_${MACHINE_NAME} ${BUILD_DIR}/conf/bblayers.conf
 
-    cp ${YOCTO_DIR}/conf/local.conf.example ${BUILD_DIR}/conf/local.conf
+    cp ${YOCTO_DIR}/conf/local.conf.example_${MACHINE_NAME} ${BUILD_DIR}/conf/local.conf
 
     cp ${YOCTO_DIR}/conf/${TARGET_ARCH}/local_conf_* ${BUILD_DIR}/conf/
 
@@ -195,8 +227,12 @@ if [ ! -d conf ]; then
 fi
 
 SHIFTCOUNT=0
-TARGET_ARCH=${TARGET_ARCH:-arm}
 MACHINE_NAME=${MACHINE_NAME:-qemuarm}
+
+source machine_configs/${MACHINE_NAME}
+
+TARGET_ARCH=${TARGET_ARCH:-arm}
+IMAGE_NAME=${IMAGE_NAME:-console-image}
 
 while getopts ":h?:o:f:m:p:c:i:a:" opt; do
     case "${opt:-}" in
